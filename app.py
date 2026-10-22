@@ -30,166 +30,162 @@ DATA_DIR = APP_DIR / "data"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Custom CSS for IMDb Cinematic Dark & Gold Theme
+# Custom CSS for Anime Streaming Dark & Vibrant Orange Theme
 st.markdown("""
 <style>
     /* Global Background & Font */
     .stApp {
-        background-color: #121212;
-        color: #FFFFFF;
+        background-color: #141519;
+        color: #F7F7F8;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* IMDb Navigation / Header */
-    .imdb-brand {
-        display: inline-block;
-        background-color: #F5C518;
+    /* Brand Header */
+    .brand-logo-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background-color: #FF640A;
         color: #000000 !important;
         font-weight: 900;
-        font-size: 1.5rem;
-        letter-spacing: -0.05em;
-        padding: 0.15rem 0.6rem;
-        border-radius: 4px;
-        margin-right: 0.5rem;
+        font-size: 1.1rem;
+        border-radius: 50%;
+        margin-right: 0.6rem;
         vertical-align: middle;
+        box-shadow: 0 0 16px rgba(255, 100, 10, 0.35);
     }
     .main-header {
-        font-size: 2.1rem;
-        font-weight: 800;
+        font-size: 2.2rem;
+        font-weight: 900;
         color: #FFFFFF;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
         margin-bottom: 0.2rem;
+        letter-spacing: -0.02em;
+    }
+    .orange-text {
+        color: #FF640A;
     }
     .sub-header {
-        color: #AAAAAA;
+        color: #A0A0B2;
         font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* IMDb Section Heading with Yellow Bar */
-    .imdb-section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-top: 1rem;
-        margin-bottom: 0.8rem;
-    }
-    .yellow-bar {
-        width: 4px;
-        height: 24px;
-        background-color: #F5C518;
-        border-radius: 2px;
-        display: inline-block;
-    }
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #FFFFFF;
+        margin-bottom: 1.6rem;
     }
 
     /* Metric Card Styling */
     .metric-card {
-        background-color: #1A1A1A;
-        border: 1px solid #313131;
-        border-top: 3px solid #F5C518;
-        border-radius: 6px;
-        padding: 1.2rem;
+        background-color: #1E1F25;
+        border: 1px solid #2D2F37;
+        border-top: 3px solid #FF640A;
+        border-radius: 8px;
+        padding: 1.25rem;
         color: white;
         text-align: center;
         transition: transform 0.2s ease, border-color 0.2s ease;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
     .metric-card:hover {
         transform: translateY(-2px);
-        border-color: #F5C518;
+        border-color: #FF640A;
     }
     .metric-value {
-        font-size: 2.1rem;
+        font-size: 2.2rem;
         font-weight: 900;
-        color: #F5C518;
+        color: #FF640A;
         margin: 0.2rem 0;
     }
     .metric-label {
         font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #AAAAAA;
+        letter-spacing: 0.06em;
+        color: #A0A0B2;
+        font-weight: 700;
     }
 
     /* Prediction Result Banner */
     .prediction-box {
-        background: linear-gradient(180deg, #222222 0%, #171717 100%);
-        border: 1px solid #3d3d3d;
-        border-left: 6px solid #F5C518;
-        border-radius: 6px;
-        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, #1E1F25 0%, #16171C 100%);
+        border: 1px solid #2D2F37;
+        border-left: 6px solid #FF640A;
+        border-radius: 8px;
+        padding: 1.4rem 1.6rem;
         margin: 1.2rem 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
     .prediction-badge {
         display: inline-block;
-        background-color: #F5C518;
-        color: #000000;
-        padding: 0.35rem 1rem;
-        border-radius: 4px;
+        background-color: #FF640A;
+        color: #FFFFFF;
+        padding: 0.4rem 1.2rem;
+        border-radius: 6px;
         font-weight: 900;
-        font-size: 1.3rem;
-        letter-spacing: -0.02em;
+        font-size: 1.35rem;
+        letter-spacing: -0.01em;
+        box-shadow: 0 0 14px rgba(255, 100, 10, 0.35);
     }
     
     /* Movie Recommendation Card */
     .rec-card {
-        background-color: #1A1A1A;
-        border: 1px solid #313131;
-        border-radius: 6px;
-        padding: 1.1rem;
+        background-color: #1E1F25;
+        border: 1px solid #2D2F37;
+        border-radius: 8px;
+        padding: 1.2rem;
         margin-bottom: 0.9rem;
-        transition: border-color 0.2s ease;
+        transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .rec-card:hover {
-        border-color: #F5C518;
+        transform: translateY(-2px);
+        border-color: #FF640A;
+        box-shadow: 0 4px 18px rgba(255, 100, 10, 0.2);
     }
     .rec-title {
         font-size: 1.15rem;
-        font-weight: 700;
+        font-weight: 800;
         color: #FFFFFF;
         margin-bottom: 0.2rem;
     }
     .genre-pill {
-        background-color: #313131;
-        color: #E0E0E0;
-        padding: 0.18rem 0.55rem;
-        border-radius: 3px;
-        font-size: 0.78rem;
-        font-weight: 600;
-        margin-right: 0.5rem;
-    }
-    .sim-badge {
-        background-color: rgba(245, 197, 24, 0.15);
-        border: 1px solid #F5C518;
-        color: #F5C518;
-        padding: 0.18rem 0.55rem;
+        background-color: #2D2F37;
+        color: #E2E2EC;
+        padding: 0.18rem 0.6rem;
         border-radius: 4px;
         font-size: 0.78rem;
         font-weight: 700;
+        margin-right: 0.5rem;
+        border: 1px solid #3A3D47;
+    }
+    .sim-badge {
+        background-color: rgba(255, 100, 10, 0.15);
+        border: 1px solid #FF640A;
+        color: #FF640A;
+        padding: 0.18rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        font-weight: 800;
     }
     .rec-overview {
         font-size: 0.88rem;
-        color: #AAAAAA;
-        line-height: 1.45;
-        margin-top: 0.4rem;
+        color: #A0A0B2;
+        line-height: 1.5;
+        margin-top: 0.45rem;
     }
 
     /* Buttons */
     .stButton > button {
-        background-color: #F5C518 !important;
-        color: #000000 !important;
-        font-weight: 700 !important;
+        background-color: #FF640A !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
         border: none !important;
-        border-radius: 4px !important;
-        transition: background-color 0.2s ease !important;
+        border-radius: 6px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 14px rgba(255, 100, 10, 0.3) !important;
     }
     .stButton > button:hover {
-        background-color: #E2B616 !important;
+        background-color: #E05300 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(255, 100, 10, 0.45) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -291,8 +287,8 @@ with st.sidebar:
 
 
 # --- MAIN HEADER ---
-st.markdown('<div class="main-header"><span class="imdb-brand">IMDb</span> Genre AI: Classifier & Recommender</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">IMDb-styled Natural Language Processing pipeline classifying synopses into genres with Naive Bayes & TF-IDF similarity.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"><span class="brand-logo-icon">▷</span> CINE<span class="orange-text">VERSE</span> AI</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Next-gen Natural Language Processing pipeline classifying synopses into genres with Naive Bayes & TF-IDF similarity.</div>', unsafe_allow_html=True)
 
 # Check model availability; offer training prompt if absent
 engine, load_error = load_app_engine()
@@ -395,7 +391,7 @@ with tab1:
                 prob_df["probability_pct"] = prob_df["probability"] * 100
                 st.bar_chart(
                     data=prob_df.set_index("genre")["probability_pct"],
-                    color="#F5C518",
+                    color="#FF640A",
                     height=220
                 )
 
@@ -501,7 +497,7 @@ with tab2:
                     list(genre_dist.items()),
                     columns=["Genre", "Movie Count"]
                 ).set_index("Genre")
-                st.bar_chart(dist_df, color="#F5C518", height=380)
+                st.bar_chart(dist_df, color="#FF640A", height=380)
 
         with col_cm:
             st.markdown("#### 🎯 Confusion Matrix Diagnostic")
