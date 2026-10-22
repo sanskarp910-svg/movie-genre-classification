@@ -1,7 +1,6 @@
 """
 Vercel Serverless Entrypoint & REST API for Movie Genre Classification & Recommendation.
-Designed with ultra-lightweight pure Python inference to guarantee instant cold boots
-and stay well under Vercel's strict 250MB serverless bundle limit.
+Styled with the iconic IMDb Dark & Gold Cinematic Theme.
 """
 
 import os
@@ -95,225 +94,555 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineGenre AI | Movie Genre Classification & Recommender</title>
+  <title>IMDb Genre AI | Movie Genre Classification & Recommendation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: #131b2e;
-      --card-border: #1e293b;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-      --gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+      --imdb-gold: #F5C518;
+      --imdb-gold-hover: #E2B616;
+      --imdb-black: #0E0E0E;
+      --imdb-dark-bg: #121212;
+      --imdb-card-bg: #1A1A1A;
+      --imdb-surface: #252525;
+      --imdb-border: #313131;
+      --imdb-text: #FFFFFF;
+      --imdb-text-muted: #AAAAAA;
+      --imdb-link: #5799EF;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--imdb-dark-bg);
+      color: var(--imdb-text);
+      line-height: 1.5;
       min-height: 100vh;
-      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
     }
-    .container { max-width: 1100px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 2rem; }
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
+
+    /* IMDb Top Navbar */
+    .navbar {
+      background-color: var(--imdb-black);
+      border-bottom: 1px solid var(--imdb-border);
+      padding: 0.75rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .subtitle { color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: 0 auto; }
-    .badge {
-      display: inline-block;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #a5b4fc;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 0.75rem;
+    .nav-left { display: flex; align-items: center; gap: 1.25rem; }
+    .imdb-brand-logo {
+      background-color: var(--imdb-gold);
+      color: #000000;
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: -0.05em;
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1.1;
     }
-    
-    /* Tabs */
-    .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--card-border); margin-bottom: 2rem; }
+    .imdb-brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--imdb-text);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .imdb-pro-pill {
+      background: rgba(245, 197, 24, 0.15);
+      border: 1px solid var(--imdb-gold);
+      color: var(--imdb-gold);
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem 1rem;
+      flex: 1;
+    }
+
+    /* IMDb Section Heading with Signature Yellow Bar */
+    .imdb-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .yellow-bar {
+      width: 4px;
+      height: 28px;
+      background-color: var(--imdb-gold);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--imdb-text);
+      letter-spacing: 0.01em;
+    }
+    .section-subtitle {
+      color: var(--imdb-text-muted);
+      font-size: 0.9rem;
+      margin-top: -0.75rem;
+      margin-bottom: 1.25rem;
+      margin-left: 1.25rem;
+    }
+
+    /* Tabs Bar */
+    .tab-bar {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--imdb-border);
+      margin-bottom: 1.75rem;
+    }
     .tab-btn {
-      background: none; border: none; color: var(--text-muted); padding: 0.75rem 1.5rem;
-      font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer;
-      border-bottom: 2px solid transparent; transition: all 0.2s;
+      background: none;
+      border: none;
+      color: var(--imdb-text-muted);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active { color: #818cf8; border-bottom-color: #818cf8; }
+    .tab-btn:hover { color: var(--imdb-text); }
+    .tab-btn.active {
+      color: var(--imdb-gold);
+      border-bottom-color: var(--imdb-gold);
+    }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    
-    /* Form & Inputs */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
+
+    /* Cards & Form */
+    .imdb-card {
+      background-color: var(--imdb-card-bg);
+      border: 1px solid var(--imdb-border);
+      border-radius: 8px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
-    .input-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 1.25rem; }
-    @media (max-width: 768px) { .input-grid { grid-template-columns: 1fr; } }
-    label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; color: #cbd5e1; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--imdb-gold);
+      margin-bottom: 0.5rem;
+    }
     textarea, select, input {
-      width: 100%; background: #0b0f19; border: 1px solid #334155; border-radius: 8px;
-      padding: 0.75rem; color: var(--text); font-family: inherit; font-size: 0.95rem; resize: vertical;
+      width: 100%;
+      background-color: var(--imdb-black);
+      border: 1px solid var(--imdb-border);
+      border-radius: 4px;
+      padding: 0.8rem 1rem;
+      color: var(--imdb-text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    textarea:focus, select:focus, input:focus { outline: none; border-color: var(--accent); }
-    .btn {
-      display: inline-block; width: 100%; background: var(--accent); color: white;
-      border: none; border-radius: 8px; padding: 0.9rem; font-size: 1rem; font-weight: 700;
-      cursor: pointer; transition: background 0.2s; margin-top: 1rem;
+    textarea:focus, select:focus, input:focus {
+      outline: none;
+      border-color: var(--imdb-gold);
+      box-shadow: 0 0 0 1px var(--imdb-gold);
     }
-    .btn:hover { background: var(--accent-hover); }
-    
-    /* Results */
-    .result-banner {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
-      border: 1px solid rgba(139, 92, 246, 0.4);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin: 1.5rem 0;
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 1.25rem;
+    }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    /* IMDb Gold CTA Button */
+    .imdb-btn {
+      background-color: var(--imdb-gold);
+      color: #000000;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      padding: 0.85rem 1.75rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .imdb-btn:hover {
+      background-color: var(--imdb-gold-hover);
+    }
+    .imdb-btn:active {
+      transform: scale(0.99);
+    }
+
+    /* Prediction Banner */
+    .prediction-hero {
+      background: linear-gradient(180deg, #222222 0%, #171717 100%);
+      border: 1px solid #3d3d3d;
+      border-left: 6px solid var(--imdb-gold);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
     }
-    .primary-genre {
-      background: #6366f1; color: white; padding: 0.4rem 1rem; border-radius: 9999px;
-      font-weight: 700; font-size: 1.2rem;
+    .genre-badge {
+      background-color: var(--imdb-gold);
+      color: #000000;
+      font-weight: 900;
+      font-size: 1.4rem;
+      padding: 0.35rem 1.25rem;
+      border-radius: 4px;
+      display: inline-block;
+      letter-spacing: -0.02em;
     }
-    .prob-bar-container { margin-bottom: 0.75rem; }
-    .prob-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.2rem; }
-    .prob-bar { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
-    .prob-fill { height: 100%; background: var(--accent); border-radius: 4px; }
-    
-    /* Recommendations */
-    .rec-item {
-      background: #0f172a; border-left: 4px solid var(--accent);
-      border-radius: 8px; padding: 1.1rem; margin-bottom: 0.9rem;
+    .star-score {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--imdb-gold);
     }
-    .rec-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
-    .rec-title { font-weight: 700; font-size: 1.1rem; color: #f1f5f9; }
-    .rec-match { background: #065f46; color: #6ee7b7; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
-    
-    /* Stats KPIs */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .kpi-card {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
-      padding: 1.25rem; text-align: center;
+
+    /* Probabilities / Progress Bars */
+    .bar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.65rem;
+      gap: 1rem;
     }
-    .kpi-val { font-size: 2rem; font-weight: 800; color: #818cf8; }
-    .kpi-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); }
-    
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; }
-    th { color: #cbd5e1; font-weight: 700; background: #0b0f19; }
+    .bar-label {
+      width: 140px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #E0E0E0;
+    }
+    .bar-track {
+      flex: 1;
+      height: 12px;
+      background-color: var(--imdb-black);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #333333;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #F5C518, #FFB800);
+      border-radius: 6px;
+    }
+    .bar-pct {
+      width: 60px;
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--imdb-gold);
+    }
+
+    /* Movie Cards: IMDb "More like this" style */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .movie-card {
+      background-color: var(--imdb-surface);
+      border: 1px solid var(--imdb-border);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .movie-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--imdb-gold);
+    }
+    .card-top {
+      background-color: #1A1A1A;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--imdb-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .movie-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--imdb-text);
+      line-height: 1.3;
+    }
+    .match-pill {
+      background-color: rgba(245, 197, 24, 0.15);
+      border: 1px solid var(--imdb-gold);
+      color: var(--imdb-gold);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .card-body {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .genre-pill {
+      display: inline-block;
+      background-color: #313131;
+      color: #E0E0E0;
+      padding: 0.15rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      align-self: flex-start;
+    }
+    .movie-synopsis {
+      font-size: 0.85rem;
+      color: var(--imdb-text-muted);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    /* KPI Cards (IMDb Pro style) */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-box {
+      background-color: var(--imdb-card-bg);
+      border: 1px solid var(--imdb-border);
+      border-top: 3px solid var(--imdb-gold);
+      border-radius: 6px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .kpi-num {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--imdb-gold);
+      line-height: 1.1;
+      margin-bottom: 0.3rem;
+    }
+    .kpi-desc {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--imdb-text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--imdb-border);
+      font-size: 0.9rem;
+    }
+    th {
+      background-color: var(--imdb-black);
+      color: var(--imdb-gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td {
+      background-color: rgba(245, 197, 24, 0.04);
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--imdb-black);
+      border-top: 1px solid var(--imdb-border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--imdb-text-muted);
+      font-size: 0.85rem;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🎬 CineGenre AI</h1>
-      <p class="subtitle">Movie Genre Classification & Content-Based Recommendation Engine powered by TF-IDF & Multinomial Naive Bayes</p>
-      <span class="badge">🚀 Deployed & Ready on Vercel Serverless</span>
-    </header>
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="/" class="imdb-brand-logo">IMDb</a>
+      <div class="imdb-brand-title">
+        <span>Genre Classification & Recommendations</span>
+        <span class="imdb-pro-pill">PRO AI</span>
+      </div>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--imdb-text-muted);">
+      NLP Naive Bayes + TF-IDF
+    </div>
+  </nav>
 
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('predict')">🎯 Genre Predictor & Recommender</button>
-      <button class="tab-btn" onclick="switchTab('analytics')">📊 Dataset & Model Analytics</button>
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Tabs Header -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('predict')">
+        🎬 Genre Predictor & Recommender
+      </button>
+      <button class="tab-btn" onclick="switchTab('analytics')">
+        📊 Dataset & Model Analytics
+      </button>
     </div>
 
-    <!-- TAB 1: PREDICTOR -->
+    <!-- TAB 1: PREDICTOR & RECOMMENDER -->
     <div id="tab-predict" class="tab-content active">
-      <div class="card">
-        <label for="presets">⚡ Quick Demonstration Preset</label>
-        <select id="presets" onchange="applyPreset()" style="margin-bottom: 1rem;">
-          <option value="">-- Choose an example movie synopsis --</option>
-          <option value="scifi">Sci-Fi Odyssey (Space Exploration & Wormholes)</option>
-          <option value="action">Superhero Vigilante (Gotham & Urban Crime)</option>
-          <option value="comedy">Teen High School Comedy (Fake ID & Chaos)</option>
-          <option value="horror">Paranormal Supernatural Horror (Haunted Farmhouse)</option>
-          <option value="romance">Romantic Melodrama (Los Angeles Musical Love)</option>
-          <option value="animation">Sentient Animated Toys (Cowboy & Space Ranger)</option>
-        </select>
+      <div class="imdb-header">
+        <div class="yellow-bar"></div>
+        <h2 class="section-title">What to Classify</h2>
+      </div>
+      <p class="section-subtitle">Input movie synopsis and thematic keywords to predict primary genre with probabilities and retrieve similar movies.</p>
 
-        <div class="input-grid">
-          <div>
+      <div class="imdb-card">
+        <div class="form-group">
+          <label for="presets">⚡ Quick Preset Examples (Auto-fill Synopsis):</label>
+          <select id="presets" onchange="applyPreset()">
+            <option value="">-- Select an iconic movie example --</option>
+            <option value="scifi">Interstellar (Sci-Fi • Space Travel & Wormhole)</option>
+            <option value="action">The Dark Knight (Action • Batman & Gotham Anarchy)</option>
+            <option value="comedy">Superbad (Comedy • High School Party Misadventures)</option>
+            <option value="horror">The Conjuring (Horror • Farmhouse Demonic Haunting)</option>
+            <option value="romance">La La Land (Romance • Los Angeles Jazz Passion)</option>
+            <option value="animation">Toy Story (Animation • Sentient Toys Coming to Life)</option>
+          </select>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
             <label for="plot">Movie Plot Summary (Overview):</label>
-            <textarea id="plot" rows="5" placeholder="Enter movie synopsis or story outline..."></textarea>
+            <textarea id="plot" rows="5" placeholder="Enter movie overview or plot outline here..."></textarea>
           </div>
-          <div>
-            <label for="keywords">Movie Thematic Keywords:</label>
-            <textarea id="keywords" rows="5" placeholder="e.g. space, exploration, cyberpunk, superhero, romance..."></textarea>
+          <div class="form-group">
+            <label for="keywords">Thematic Keywords / Tags:</label>
+            <textarea id="keywords" rows="5" placeholder="e.g. superhero, gotham city, vigilante, explosion, crime fighter..."></textarea>
           </div>
         </div>
 
-        <button class="btn" onclick="runPrediction()">🚀 Classify Genre & Recommend Similar Movies</button>
+        <button class="imdb-btn" onclick="runPrediction()">
+          <span>★</span> Classify Genre & Find Similar Movies
+        </button>
       </div>
 
+      <!-- Output Section -->
       <div id="result-section" style="display: none;">
-        <div class="result-banner">
+        <div class="imdb-header">
+          <div class="yellow-bar"></div>
+          <h2 class="section-title">Predicted Classification</h2>
+        </div>
+
+        <div class="prediction-hero">
           <div>
-            <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Predicted Primary Genre</div>
-            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.3rem;">
-              <span class="primary-genre" id="res-genre">Action</span>
-              <span style="font-size: 1.1rem; color: #cbd5e1;">Confidence: <strong id="res-confidence">0%</strong></span>
+            <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--imdb-text-muted); font-weight: 700;">
+              Primary Genre Match
             </div>
+            <div style="margin-top: 0.4rem; display: flex; align-items: center; gap: 1rem;">
+              <span class="genre-badge" id="res-genre">Action</span>
+            </div>
+          </div>
+          <div class="star-score">
+            <span>★</span>
+            <span>Confidence: <strong id="res-confidence" style="color: #FFFFFF;">0%</strong></span>
           </div>
         </div>
 
-        <div class="card">
-          <h3 style="margin-bottom: 1rem;">📊 Top Genre Probabilities</h3>
-          <div id="prob-bars"></div>
+        <!-- Probabilities -->
+        <div class="imdb-card">
+          <div class="imdb-header">
+            <div class="yellow-bar"></div>
+            <h3 class="section-title" style="font-size: 1.2rem;">Top Genre Probability Breakdown</h3>
+          </div>
+          <div id="prob-bars" style="margin-top: 1rem;"></div>
         </div>
 
-        <div class="card">
-          <h3 style="margin-bottom: 1rem;">🎯 Similar Content Recommendations (Cosine Similarity)</h3>
-          <div id="rec-list"></div>
+        <!-- Recommendations: IMDb "More Like This" style -->
+        <div class="imdb-header" style="margin-top: 2rem;">
+          <div class="yellow-bar"></div>
+          <h2 class="section-title">More Like This (Content-Based Recommendations)</h2>
         </div>
+        <p class="section-subtitle">Top movie matches retrieved from the catalog using TF-IDF Cosine Similarity.</p>
+
+        <div class="rec-grid" id="rec-list"></div>
       </div>
     </div>
 
     <!-- TAB 2: ANALYTICS -->
     <div id="tab-analytics" class="tab-content">
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-title">Model Accuracy</div>
-          <div class="kpi-val" id="kpi-acc">35.0%</div>
-          <div style="font-size: 0.8rem; color: var(--success);">MultinomialNB</div>
+      <div class="imdb-header">
+        <div class="yellow-bar"></div>
+        <h2 class="section-title">Model Metrics & Dataset Performance</h2>
+      </div>
+      <p class="section-subtitle">Quantitative diagnostics and evaluation results for the Multinomial Naive Bayes classifier.</p>
+
+      <div class="kpi-row">
+        <div class="kpi-box">
+          <div class="kpi-num" id="kpi-acc">35.0%</div>
+          <div class="kpi-desc">Overall Test Accuracy</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-title">Corpus Size</div>
-          <div class="kpi-val" id="kpi-total">100</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Top 10 Genres</div>
+        <div class="kpi-box">
+          <div class="kpi-num" id="kpi-total">100</div>
+          <div class="kpi-desc">Catalog Titles (10 Genres)</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-title">TF-IDF Features</div>
-          <div class="kpi-val" id="kpi-vocab">3,907</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">Unigram + Bigram</div>
+        <div class="kpi-box">
+          <div class="kpi-num" id="kpi-vocab">3,907</div>
+          <div class="kpi-desc">TF-IDF Features (1 & 2-grams)</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-title">Test Split Size</div>
-          <div class="kpi-val" id="kpi-test">20</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">20% Stratified Split</div>
+        <div class="kpi-box">
+          <div class="kpi-num" id="kpi-test">20</div>
+          <div class="kpi-desc">Evaluation Test Samples</div>
         </div>
       </div>
 
-      <div class="card">
-        <h3 style="margin-bottom: 0.75rem;">🎭 Genre Classification Report</h3>
+      <div class="imdb-card">
+        <div class="imdb-header">
+          <div class="yellow-bar"></div>
+          <h3 class="section-title" style="font-size: 1.2rem;">Classification Report by Genre</h3>
+        </div>
         <div style="overflow-x: auto;">
           <table id="report-table">
             <thead>
@@ -331,6 +660,15 @@ HTML_TEMPLATE = """
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer>
+    <div style="margin-bottom: 0.5rem;">
+      <span style="background-color: var(--imdb-gold); color: #000; font-weight: 900; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.85rem;">IMDb</span>
+      <span style="margin-left: 0.5rem; font-weight: 700; color: #FFFFFF;">Movie Genre Classifier</span>
+    </div>
+    An NLP machine learning system powered by TF-IDF & Multinomial Naive Bayes.
+  </footer>
 
   <script>
     const presets = {
@@ -410,28 +748,34 @@ HTML_TEMPLATE = """
         barsContainer.innerHTML = '';
         predRes.top_predictions.forEach(item => {
           barsContainer.innerHTML += `
-            <div class="prob-bar-container">
-              <div class="prob-label"><span>${item.genre}</span><span>${item.percentage}</span></div>
-              <div class="prob-bar"><div class="prob-fill" style="width: ${item.probability * 100}%"></div></div>
+            <div class="bar-row">
+              <div class="bar-label">${item.genre}</div>
+              <div class="bar-track"><div class="bar-fill" style="width: ${item.probability * 100}%"></div></div>
+              <div class="bar-pct">${item.percentage}</div>
             </div>
           `;
         });
 
-        // Render recommendations
+        // Render recommendations (IMDb card style)
         const recContainer = document.getElementById('rec-list');
         recContainer.innerHTML = '';
         recRes.recommendations.forEach((item, idx) => {
           recContainer.innerHTML += `
-            <div class="rec-item">
-              <div class="rec-header">
-                <span class="rec-title">#${idx + 1}. ${item.title}</span>
-                <span class="rec-match">Cosine Match: ${item.similarity_percentage}</span>
+            <div class="movie-card">
+              <div class="card-top">
+                <span class="movie-title">#${idx + 1}. ${item.title}</span>
+                <span class="match-pill">★ ${item.similarity_percentage} Match</span>
               </div>
-              <div style="font-size: 0.85rem; color: #a5b4fc; margin-bottom: 0.3rem;">🎭 ${item.genre}</div>
-              <p style="font-size: 0.9rem; color: #cbd5e1;">${item.overview}</p>
+              <div class="card-body">
+                <span class="genre-pill">${item.genre}</span>
+                <p class="movie-synopsis">${item.overview}</p>
+              </div>
             </div>
           `;
         });
+
+        // Scroll smoothly to result
+        sec.scrollIntoView({ behavior: 'smooth' });
 
       } catch (err) {
         alert("Error during prediction: " + err);

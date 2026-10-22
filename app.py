@@ -30,116 +30,166 @@ DATA_DIR = APP_DIR / "data"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Custom CSS for modern UI design
+# Custom CSS for IMDb Cinematic Dark & Gold Theme
 st.markdown("""
 <style>
-    /* Main Theme & Typography */
+    /* Global Background & Font */
+    .stApp {
+        background-color: #121212;
+        color: #FFFFFF;
+    }
+    
+    /* IMDb Navigation / Header */
+    .imdb-brand {
+        display: inline-block;
+        background-color: #F5C518;
+        color: #000000 !important;
+        font-weight: 900;
+        font-size: 1.5rem;
+        letter-spacing: -0.05em;
+        padding: 0.15rem 0.6rem;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
     .main-header {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 2.3rem;
+        font-size: 2.1rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #FF4B4B 0%, #7928CA 50%, #4338CA 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #FFFFFF;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
         margin-bottom: 0.2rem;
     }
     .sub-header {
-        color: #64748B;
-        font-size: 1.05rem;
+        color: #AAAAAA;
+        font-size: 0.95rem;
         margin-bottom: 1.5rem;
     }
     
+    /* IMDb Section Heading with Yellow Bar */
+    .imdb-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-top: 1rem;
+        margin-bottom: 0.8rem;
+    }
+    .yellow-bar {
+        width: 4px;
+        height: 24px;
+        background-color: #F5C518;
+        border-radius: 2px;
+        display: inline-block;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #FFFFFF;
+    }
+
     /* Metric Card Styling */
     .metric-card {
-        background: linear-gradient(145deg, #1E293B, #0F172A);
-        border: 1px solid #334155;
-        border-radius: 12px;
+        background-color: #1A1A1A;
+        border: 1px solid #313131;
+        border-top: 3px solid #F5C518;
+        border-radius: 6px;
         padding: 1.2rem;
         color: white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         text-align: center;
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .metric-card:hover {
         transform: translateY(-2px);
-        border-color: #6366F1;
+        border-color: #F5C518;
     }
     .metric-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #F8FAFC;
-        margin: 0.3rem 0;
+        font-size: 2.1rem;
+        font-weight: 900;
+        color: #F5C518;
+        margin: 0.2rem 0;
     }
     .metric-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #94A3B8;
+        color: #AAAAAA;
     }
 
     /* Prediction Result Banner */
     .prediction-box {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
-        border: 1px solid rgba(139, 92, 246, 0.4);
-        border-radius: 14px;
-        padding: 1.4rem 1.6rem;
+        background: linear-gradient(180deg, #222222 0%, #171717 100%);
+        border: 1px solid #3d3d3d;
+        border-left: 6px solid #F5C518;
+        border-radius: 6px;
+        padding: 1.25rem 1.5rem;
         margin: 1.2rem 0;
     }
     .prediction-badge {
         display: inline-block;
-        background-color: #6366F1;
-        color: white;
-        padding: 0.35rem 0.9rem;
-        border-radius: 9999px;
-        font-weight: 700;
-        font-size: 1.1rem;
-        letter-spacing: 0.02em;
+        background-color: #F5C518;
+        color: #000000;
+        padding: 0.35rem 1rem;
+        border-radius: 4px;
+        font-weight: 900;
+        font-size: 1.3rem;
+        letter-spacing: -0.02em;
     }
     
     /* Movie Recommendation Card */
     .rec-card {
-        background: #1E293B;
-        border-left: 4px solid #6366F1;
-        border-radius: 8px;
+        background-color: #1A1A1A;
+        border: 1px solid #313131;
+        border-radius: 6px;
         padding: 1.1rem;
         margin-bottom: 0.9rem;
-        border-top: 1px solid #334155;
-        border-right: 1px solid #334155;
-        border-bottom: 1px solid #334155;
+        transition: border-color 0.2s ease;
+    }
+    .rec-card:hover {
+        border-color: #F5C518;
     }
     .rec-title {
         font-size: 1.15rem;
         font-weight: 700;
-        color: #F1F5F9;
+        color: #FFFFFF;
         margin-bottom: 0.2rem;
     }
-    .rec-meta {
-        font-size: 0.85rem;
-        color: #94A3B8;
-        margin-bottom: 0.5rem;
-    }
     .genre-pill {
-        background: #334155;
-        color: #E2E8F0;
+        background-color: #313131;
+        color: #E0E0E0;
         padding: 0.18rem 0.55rem;
-        border-radius: 6px;
+        border-radius: 3px;
         font-size: 0.78rem;
         font-weight: 600;
         margin-right: 0.5rem;
     }
     .sim-badge {
-        background: #065F46;
-        color: #6EE7B7;
+        background-color: rgba(245, 197, 24, 0.15);
+        border: 1px solid #F5C518;
+        color: #F5C518;
         padding: 0.18rem 0.55rem;
-        border-radius: 6px;
+        border-radius: 4px;
         font-size: 0.78rem;
-        font-weight: 600;
+        font-weight: 700;
     }
     .rec-overview {
         font-size: 0.88rem;
-        color: #CBD5E1;
+        color: #AAAAAA;
         line-height: 1.45;
         margin-top: 0.4rem;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        background-color: #F5C518 !important;
+        color: #000000 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 4px !important;
+        transition: background-color 0.2s ease !important;
+    }
+    .stButton > button:hover {
+        background-color: #E2B616 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -241,8 +291,8 @@ with st.sidebar:
 
 
 # --- MAIN HEADER ---
-st.markdown('<div class="main-header">🎬 CineGenre AI: Movie Genre Classifier & Recommender</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Production-grade Natural Language Processing pipeline classifying film synopses into genres with Naive Bayes & TF-IDF similarity recommendations.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header"><span class="imdb-brand">IMDb</span> Genre AI: Classifier & Recommender</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">IMDb-styled Natural Language Processing pipeline classifying synopses into genres with Naive Bayes & TF-IDF similarity.</div>', unsafe_allow_html=True)
 
 # Check model availability; offer training prompt if absent
 engine, load_error = load_app_engine()
@@ -345,7 +395,7 @@ with tab1:
                 prob_df["probability_pct"] = prob_df["probability"] * 100
                 st.bar_chart(
                     data=prob_df.set_index("genre")["probability_pct"],
-                    color="#6366F1",
+                    color="#F5C518",
                     height=220
                 )
 
@@ -451,7 +501,7 @@ with tab2:
                     list(genre_dist.items()),
                     columns=["Genre", "Movie Count"]
                 ).set_index("Genre")
-                st.bar_chart(dist_df, color="#8B5CF6", height=380)
+                st.bar_chart(dist_df, color="#F5C518", height=380)
 
         with col_cm:
             st.markdown("#### 🎯 Confusion Matrix Diagnostic")
