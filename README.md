@@ -128,6 +128,60 @@ python src/recommend.py
 
 ---
 
+## 🌐 Deployment Guide (GitHub & Vercel)
+
+This project is dual-configured:
+1. **Vercel Serverless Deployment**: Powered by `vercel.json` and `api/index.py` (Flask REST API + modern full-stack web UI with 0ms cold starts).
+2. **Streamlit Deployment**: Powered by `app.py` (Streamlit UI for local execution or Streamlit Community Cloud).
+
+---
+
+### Step 1: Push to GitHub
+
+1. Create a new repository on [GitHub](https://github.com/new) (e.g. `movie-genre-classification`). Leave it empty (do **not** check initialize with README/license).
+2. Open PowerShell or terminal in `movie_genre_app`:
+   ```bash
+   cd movie_genre_app
+
+   # Link your GitHub repository (replace with your actual GitHub username and repository name)
+   git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY_NAME>.git
+
+   # Push to main branch
+   git push -u origin main
+   ```
+
+---
+
+### Step 2: Deploy to Vercel (1-Click via GitHub)
+
+1. Go to [Vercel](https://vercel.com/) and sign in with your GitHub account.
+2. Click **"Add New..."** ➔ **"Project"**.
+3. Select your GitHub repository from the list and click **"Import"**.
+4. In the Project Configuration:
+   - **Framework Preset**: *Other* (Vercel will automatically read `vercel.json`)
+   - **Root Directory**: `./` (or leave default)
+5. Click **"Deploy"**.
+6. Within 60 seconds, your project will be live with a production HTTPS URL (e.g. `https://movie-genre-app.vercel.app`)!
+
+#### Deploying via Vercel CLI (Alternative):
+```bash
+npm install -g vercel
+cd movie_genre_app
+vercel
+```
+
+---
+
+### Step 3 (Optional): Deploy Streamlit UI to Streamlit Community Cloud
+
+If you also wish to host the native Streamlit dashboard publicly for free:
+1. Go to [share.streamlit.io](https://share.streamlit.io/) and log in with GitHub.
+2. Click **"New app"**.
+3. Select your repository, set **Branch** to `main`, and **Main file path** to `app.py`.
+4. Click **"Deploy!"**.
+
+---
+
 ## 🛠️ Technology Stack
 - **Language**: Python 3.11
 - **NLP & Feature Engineering**: TF-IDF (`scikit-learn`), Regular Expressions (`re`), Safe JSON Parsing (`ast.literal_eval`), NLTK Stopwords
