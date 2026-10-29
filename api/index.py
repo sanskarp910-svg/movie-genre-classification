@@ -1044,7 +1044,7 @@ HTML_TEMPLATE = """
                   rows="1" 
                   oninput="updateWordCount()"
                   onfocus="expandTypebar()"></textarea>
-        <button class="quick-submit-btn" onclick="runPrediction()" title="Classify & Discover">
+        <button class="quick-submit-btn" id="quick-classify-btn" type="button" onclick="runPrediction()" title="Classify & Discover">
           <span>▶</span>
         </button>
       </div>
@@ -1078,16 +1078,16 @@ HTML_TEMPLATE = """
 
           <!-- Action Toolbar -->
           <div class="button-toolbar">
-            <button class="cr-btn" onclick="runPrediction()">
+            <button class="cr-btn" id="classify-btn" type="button" onclick="runPrediction()">
               <span>⚡</span> Classify Genres & Match Films
             </button>
-            <button class="cr-btn-secondary" onclick="tryRandomExample()">
+            <button class="cr-btn-secondary" type="button" onclick="tryRandomExample()">
               <span>🎲</span> Random Example
             </button>
-            <button class="cr-btn-secondary" onclick="clearInputs()">
+            <button class="cr-btn-secondary" type="button" onclick="clearInputs()">
               <span>🗑️</span> Clear
             </button>
-            <button class="cr-btn-secondary" onclick="copyShareableLink()">
+            <button class="cr-btn-secondary" type="button" onclick="copyShareableLink()">
               <span>🔗</span> Share Link
             </button>
           </div>
@@ -1464,10 +1464,12 @@ HTML_TEMPLATE = """
 
     function collapseTypebar(force = false) {
       const text = document.getElementById('plot').value.trim();
+      const kw = document.getElementById('keywords').value.trim();
       const isFocused = document.activeElement === document.getElementById('plot') ||
                         document.activeElement === document.getElementById('keywords') ||
-                        document.activeElement === document.getElementById('presets');
-      if (force || (!text && !isFocused)) {
+                        document.activeElement === document.getElementById('presets') ||
+                        document.activeElement === document.getElementById('classify-btn');
+      if (force || (!text && !kw && !isFocused)) {
         document.getElementById('search-box').classList.remove('is-expanded');
       }
     }
@@ -1702,17 +1704,30 @@ HTML_TEMPLATE = """
 
     // Prediction Engine
     async function runPrediction() {
-      const plot = document.getElementById('plot').value.trim();
-      const keywords = document.getElementById('keywords').value.trim();
+      const plotInput = document.getElementById('plot');
+      const kwInput = document.getElementById('keywords');
+      let plot = (plotInput ? plotInput.value : '').trim();
+      let keywords = (kwInput ? kwInput.value : '').trim();
 
+      // If user clicks classify when input is empty, auto-load a rich preset so it ALWAYS works!
       if (!plot && !keywords) {
-        expandTypebar();
-        document.getElementById('plot').focus();
+        tryRandomExample();
         return;
       }
       
       const errAlert = document.getElementById('error-alert');
       if (errAlert) errAlert.style.display = "none";
+
+      const classifyBtn = document.getElementById('classify-btn');
+      const quickBtn = document.getElementById('quick-classify-btn');
+      if (classifyBtn) {
+        classifyBtn.disabled = true;
+        classifyBtn.innerHTML = `<span>⏳</span> Classifying...`;
+      }
+      if (quickBtn) {
+        quickBtn.disabled = true;
+        quickBtn.innerHTML = `<span>⏳</span>`;
+      }
 
       document.getElementById('skeleton-loader').style.display = "block";
 
@@ -1810,6 +1825,15 @@ HTML_TEMPLATE = """
           document.getElementById('error-alert-msg').innerText = "Inference issue: " + err.message + ". Click Retry to re-run.";
           errBox.style.display = "flex";
           errBox.scrollIntoView({ behavior: 'smooth' });
+        }
+      } finally {
+        if (classifyBtn) {
+          classifyBtn.disabled = false;
+          classifyBtn.innerHTML = `<span>⚡</span> Classify Genres & Match Films`;
+        }
+        if (quickBtn) {
+          quickBtn.disabled = false;
+          quickBtn.innerHTML = `<span>▶</span>`;
         }
       }
     }
@@ -2023,17 +2047,27 @@ HTML_TEMPLATE = """
       const searchBox = document.getElementById('search-box');
       const plotInput = document.getElementById('plot');
 
-      // Mouseenter / Mouseleave with 260ms grace debounce
+      // Mouseenter / Click / Mouseleave with 600ms grace debounce
       if (searchBox) {
         searchBox.addEventListener('mouseenter', () => {
+          expandTypebar();
+        });
+        searchBox.addEventListener('click', () => {
           expandTypebar();
         });
         searchBox.addEventListener('mouseleave', () => {
           collapseTimer = setTimeout(() => {
             collapseTypebar(false);
-          }, 260);
+          }, 600);
         });
       }
+
+      // Close typebar only when clicking completely outside
+      document.addEventListener('click', (e) => {
+        if (searchBox && !searchBox.contains(e.target)) {
+          collapseTypebar(false);
+        }
+      });
 
       // Enter key submits synopsis, Shift+Enter makes new line
       if (plotInput) {
