@@ -1,228 +1,846 @@
 {
-  "accuracy": 0.35,
-  "classes": [
-    "Action",
-    "Adventure",
-    "Animation",
-    "Comedy",
-    "Crime",
+  "dataset_size": 4680,
+  "vocab_size": 6000,
+  "test_size": 936,
+  "train_size": 3744,
+  "top_12_genres": [
     "Drama",
-    "Horror",
+    "Comedy",
+    "Thriller",
+    "Action",
     "Romance",
+    "Adventure",
+    "Crime",
     "Science Fiction",
-    "Thriller"
+    "Horror",
+    "Family",
+    "Fantasy",
+    "Animation"
   ],
+  "genre_distribution": {
+    "Drama": 2302,
+    "Comedy": 1721,
+    "Thriller": 1280,
+    "Action": 1163,
+    "Romance": 899,
+    "Adventure": 797,
+    "Crime": 697,
+    "Science Fiction": 540,
+    "Horror": 520,
+    "Family": 514,
+    "Fantasy": 435,
+    "Animation": 254
+  },
+  "hamming_accuracy": 0.8668,
+  "micro_f1": 0.6772,
+  "macro_f1": 0.6554,
+  "micro_precision": 0.6483,
+  "micro_recall": 0.7087,
+  "top3_hit_rate": 0.9679,
+  "top3_recall": 0.7444,
+  "exact_match_accuracy": 0.1934,
   "classification_report": {
-    "Action": {
-      "precision": 0.5,
-      "recall": 0.5,
-      "f1-score": 0.5,
-      "support": 2.0
-    },
-    "Adventure": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
-    },
-    "Animation": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
+    "Drama": {
+      "precision": 0.7573221757322176,
+      "recall": 0.755741127348643,
+      "f1-score": 0.7565308254963428,
+      "support": 479.0
     },
     "Comedy": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
-    },
-    "Crime": {
-      "precision": 1.0,
-      "recall": 0.5,
-      "f1-score": 0.6666666666666666,
-      "support": 2.0
-    },
-    "Drama": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
-    },
-    "Horror": {
-      "precision": 0.3333333333333333,
-      "recall": 0.5,
-      "f1-score": 0.4,
-      "support": 2.0
-    },
-    "Romance": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1-score": 0.0,
-      "support": 2.0
-    },
-    "Science Fiction": {
-      "precision": 0.5,
-      "recall": 1.0,
-      "f1-score": 0.6666666666666666,
-      "support": 2.0
+      "precision": 0.6967213114754098,
+      "recall": 0.7348703170028819,
+      "f1-score": 0.7152875175315568,
+      "support": 347.0
     },
     "Thriller": {
-      "precision": 0.6666666666666666,
-      "recall": 1.0,
-      "f1-score": 0.8,
-      "support": 2.0
+      "precision": 0.5985401459854015,
+      "recall": 0.6833333333333333,
+      "f1-score": 0.6381322957198443,
+      "support": 240.0
     },
-    "accuracy": 0.35,
+    "Action": {
+      "precision": 0.650375939849624,
+      "recall": 0.7587719298245614,
+      "f1-score": 0.7004048582995951,
+      "support": 228.0
+    },
+    "Romance": {
+      "precision": 0.5641025641025641,
+      "recall": 0.676923076923077,
+      "f1-score": 0.6153846153846154,
+      "support": 195.0
+    },
+    "Adventure": {
+      "precision": 0.5583756345177665,
+      "recall": 0.6707317073170732,
+      "f1-score": 0.6094182825484764,
+      "support": 164.0
+    },
+    "Crime": {
+      "precision": 0.5256410256410257,
+      "recall": 0.6721311475409836,
+      "f1-score": 0.5899280575539568,
+      "support": 122.0
+    },
+    "Science Fiction": {
+      "precision": 0.75,
+      "recall": 0.7425742574257426,
+      "f1-score": 0.746268656716418,
+      "support": 101.0
+    },
+    "Horror": {
+      "precision": 0.6548672566371682,
+      "recall": 0.74,
+      "f1-score": 0.6948356807511737,
+      "support": 100.0
+    },
+    "Family": {
+      "precision": 0.64,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.6530612244897959,
+      "support": 96.0
+    },
+    "Fantasy": {
+      "precision": 0.5274725274725275,
+      "recall": 0.5393258426966292,
+      "f1-score": 0.5333333333333333,
+      "support": 89.0
+    },
+    "Animation": {
+      "precision": 0.6666666666666666,
+      "recall": 0.5660377358490566,
+      "f1-score": 0.6122448979591837,
+      "support": 53.0
+    },
+    "micro avg": {
+      "precision": 0.6483471074380165,
+      "recall": 0.7086720867208672,
+      "f1-score": 0.6771687526974536,
+      "support": 2214.0
+    },
     "macro avg": {
-      "precision": 0.29999999999999993,
-      "recall": 0.35,
-      "f1-score": 0.30333333333333334,
-      "support": 20.0
+      "precision": 0.6325071040066975,
+      "recall": 0.6839255951607207,
+      "f1-score": 0.6554025204820243,
+      "support": 2214.0
     },
     "weighted avg": {
-      "precision": 0.29999999999999993,
-      "recall": 0.35,
-      "f1-score": 0.30333333333333334,
-      "support": 20.0
+      "precision": 0.6536187397069259,
+      "recall": 0.7086720867208672,
+      "f1-score": 0.6787755827614277,
+      "support": 2214.0
+    },
+    "samples avg": {
+      "precision": 0.6643289580789581,
+      "recall": 0.7421118233618234,
+      "f1-score": 0.6620777370777371,
+      "support": 2214.0
     }
   },
-  "confusion_matrix": [
-    [
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0
-    ],
-    [
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      1,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      1,
-      0
-    ],
-    [
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      2,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      2,
-      0
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      2
-    ]
-  ],
-  "total_movies": 100,
-  "vocab_size": 3907,
-  "genre_distribution": {
-    "Action": 10,
-    "Comedy": 10,
-    "Drama": 10,
-    "Horror": 10,
-    "Science Fiction": 10,
-    "Romance": 10,
-    "Animation": 10,
-    "Thriller": 10,
-    "Crime": 10,
-    "Adventure": 10
+  "benchmark_comparison": {
+    "Multinomial Naive Bayes": {
+      "mean_hamming_acc": 0.8655,
+      "std_hamming_acc": 0.0042,
+      "mean_micro_f1": 0.585,
+      "std_micro_f1": 0.0143,
+      "mean_macro_f1": 0.4635,
+      "std_macro_f1": 0.0142,
+      "total_cv_time_sec": 1.03
+    },
+    "Logistic Regression (Balanced)": {
+      "mean_hamming_acc": 0.8635,
+      "std_hamming_acc": 0.0028,
+      "mean_micro_f1": 0.6668,
+      "std_micro_f1": 0.0071,
+      "mean_macro_f1": 0.6398,
+      "std_macro_f1": 0.0095,
+      "total_cv_time_sec": 4.17
+    },
+    "LinearSVC (Balanced)": {
+      "mean_hamming_acc": 0.8595,
+      "std_hamming_acc": 0.0032,
+      "mean_micro_f1": 0.6431,
+      "std_micro_f1": 0.0092,
+      "mean_macro_f1": 0.6113,
+      "std_macro_f1": 0.0079,
+      "total_cv_time_sec": 3.99
+    }
   },
-  "test_size": 20,
-  "train_size": 80
+  "top_predictive_words": {
+    "Drama": [
+      {
+        "word": "biographi",
+        "weight": 4.019
+      },
+      {
+        "word": "struggl",
+        "weight": 3.523
+      },
+      {
+        "word": "love",
+        "weight": 3.217
+      },
+      {
+        "word": "independ",
+        "weight": 2.845
+      },
+      {
+        "word": "war",
+        "weight": 2.821
+      },
+      {
+        "word": "drama",
+        "weight": 2.798
+      },
+      {
+        "word": "rape",
+        "weight": 2.344
+      },
+      {
+        "word": "base true",
+        "weight": 2.26
+      },
+      {
+        "word": "true",
+        "weight": 2.26
+      },
+      {
+        "word": "age",
+        "weight": 2.258
+      }
+    ],
+    "Comedy": [
+      {
+        "word": "comedi",
+        "weight": 7.01
+      },
+      {
+        "word": "spoof",
+        "weight": 3.96
+      },
+      {
+        "word": "duringcreditssting",
+        "weight": 3.866
+      },
+      {
+        "word": "wed",
+        "weight": 3.649
+      },
+      {
+        "word": "buddi",
+        "weight": 3.202
+      },
+      {
+        "word": "date",
+        "weight": 2.842
+      },
+      {
+        "word": "big",
+        "weight": 2.774
+      },
+      {
+        "word": "show",
+        "weight": 2.7
+      },
+      {
+        "word": "decid",
+        "weight": 2.535
+      },
+      {
+        "word": "shop",
+        "weight": 2.332
+      }
+    ],
+    "Thriller": [
+      {
+        "word": "murder",
+        "weight": 5.236
+      },
+      {
+        "word": "assassin",
+        "weight": 3.075
+      },
+      {
+        "word": "suspens",
+        "weight": 3.055
+      },
+      {
+        "word": "thriller",
+        "weight": 2.993
+      },
+      {
+        "word": "dark",
+        "weight": 2.874
+      },
+      {
+        "word": "hostag",
+        "weight": 2.723
+      },
+      {
+        "word": "investig",
+        "weight": 2.635
+      },
+      {
+        "word": "nightmar",
+        "weight": 2.513
+      },
+      {
+        "word": "agent",
+        "weight": 2.495
+      },
+      {
+        "word": "kidnap",
+        "weight": 2.454
+      }
+    ],
+    "Action": [
+      {
+        "word": "cop",
+        "weight": 4.165
+      },
+      {
+        "word": "hero",
+        "weight": 4.088
+      },
+      {
+        "word": "agent",
+        "weight": 3.632
+      },
+      {
+        "word": "assassin",
+        "weight": 3.617
+      },
+      {
+        "word": "dystopia",
+        "weight": 3.474
+      },
+      {
+        "word": "reveng",
+        "weight": 3.231
+      },
+      {
+        "word": "fighter",
+        "weight": 3.189
+      },
+      {
+        "word": "mission",
+        "weight": 3.132
+      },
+      {
+        "word": "battl",
+        "weight": 3.105
+      },
+      {
+        "word": "warrior",
+        "weight": 3.088
+      }
+    ],
+    "Romance": [
+      {
+        "word": "love",
+        "weight": 9.016
+      },
+      {
+        "word": "romanc",
+        "weight": 4.857
+      },
+      {
+        "word": "woman",
+        "weight": 4.314
+      },
+      {
+        "word": "romant",
+        "weight": 4.199
+      },
+      {
+        "word": "marriag",
+        "weight": 3.719
+      },
+      {
+        "word": "fall",
+        "weight": 3.533
+      },
+      {
+        "word": "marri",
+        "weight": 3.165
+      },
+      {
+        "word": "lover",
+        "weight": 3.127
+      },
+      {
+        "word": "fall love",
+        "weight": 3.054
+      },
+      {
+        "word": "relationship",
+        "weight": 2.908
+      }
+    ],
+    "Adventure": [
+      {
+        "word": "adventur",
+        "weight": 5.18
+      },
+      {
+        "word": "wilder",
+        "weight": 3.43
+      },
+      {
+        "word": "rescu",
+        "weight": 3.266
+      },
+      {
+        "word": "jungl",
+        "weight": 3.213
+      },
+      {
+        "word": "mountain",
+        "weight": 3.022
+      },
+      {
+        "word": "treasur",
+        "weight": 2.986
+      },
+      {
+        "word": "dinosaur",
+        "weight": 2.874
+      },
+      {
+        "word": "island",
+        "weight": 2.832
+      },
+      {
+        "word": "magic",
+        "weight": 2.817
+      },
+      {
+        "word": "battl",
+        "weight": 2.574
+      }
+    ],
+    "Crime": [
+      {
+        "word": "murder",
+        "weight": 6.641
+      },
+      {
+        "word": "polic",
+        "weight": 5.134
+      },
+      {
+        "word": "cop",
+        "weight": 4.48
+      },
+      {
+        "word": "gangster",
+        "weight": 4.277
+      },
+      {
+        "word": "drug",
+        "weight": 4.025
+      },
+      {
+        "word": "crimin",
+        "weight": 4.013
+      },
+      {
+        "word": "mafia",
+        "weight": 3.753
+      },
+      {
+        "word": "detect",
+        "weight": 3.6
+      },
+      {
+        "word": "crime",
+        "weight": 3.441
+      },
+      {
+        "word": "gang",
+        "weight": 3.292
+      }
+    ],
+    "Science Fiction": [
+      {
+        "word": "alien",
+        "weight": 7.966
+      },
+      {
+        "word": "dystopia",
+        "weight": 7.807
+      },
+      {
+        "word": "futur",
+        "weight": 5.846
+      },
+      {
+        "word": "space",
+        "weight": 5.286
+      },
+      {
+        "word": "scientist",
+        "weight": 5.106
+      },
+      {
+        "word": "planet",
+        "weight": 4.585
+      },
+      {
+        "word": "earth",
+        "weight": 4.428
+      },
+      {
+        "word": "robot",
+        "weight": 4.288
+      },
+      {
+        "word": "time",
+        "weight": 4.241
+      },
+      {
+        "word": "clone",
+        "weight": 4.198
+      }
+    ],
+    "Horror": [
+      {
+        "word": "horror",
+        "weight": 6.467
+      },
+      {
+        "word": "vampir",
+        "weight": 5.539
+      },
+      {
+        "word": "evil",
+        "weight": 4.537
+      },
+      {
+        "word": "supernatur",
+        "weight": 4.441
+      },
+      {
+        "word": "zombi",
+        "weight": 4.207
+      },
+      {
+        "word": "monster",
+        "weight": 4.162
+      },
+      {
+        "word": "demon",
+        "weight": 4.074
+      },
+      {
+        "word": "killer",
+        "weight": 3.861
+      },
+      {
+        "word": "blood",
+        "weight": 3.732
+      },
+      {
+        "word": "creatur",
+        "weight": 3.726
+      }
+    ],
+    "Family": [
+      {
+        "word": "anim",
+        "weight": 6.005
+      },
+      {
+        "word": "dog",
+        "weight": 4.927
+      },
+      {
+        "word": "save",
+        "weight": 4.203
+      },
+      {
+        "word": "adventur",
+        "weight": 4.178
+      },
+      {
+        "word": "adventure",
+        "weight": 3.645
+      },
+      {
+        "word": "kid",
+        "weight": 3.474
+      },
+      {
+        "word": "robot",
+        "weight": 3.458
+      },
+      {
+        "word": "turtl",
+        "weight": 3.379
+      },
+      {
+        "word": "music",
+        "weight": 3.3
+      },
+      {
+        "word": "christma",
+        "weight": 3.236
+      }
+    ],
+    "Fantasy": [
+      {
+        "word": "magic",
+        "weight": 6.844
+      },
+      {
+        "word": "power",
+        "weight": 4.807
+      },
+      {
+        "word": "afterlif",
+        "weight": 4.513
+      },
+      {
+        "word": "wish",
+        "weight": 4.058
+      },
+      {
+        "word": "vampir",
+        "weight": 3.949
+      },
+      {
+        "word": "witch",
+        "weight": 3.947
+      },
+      {
+        "word": "immort",
+        "weight": 3.841
+      },
+      {
+        "word": "dragon",
+        "weight": 3.748
+      },
+      {
+        "word": "evil",
+        "weight": 3.587
+      },
+      {
+        "word": "battl",
+        "weight": 3.559
+      }
+    ],
+    "Animation": [
+      {
+        "word": "anim",
+        "weight": 9.894
+      },
+      {
+        "word": "adventur",
+        "weight": 4.536
+      },
+      {
+        "word": "cat",
+        "weight": 3.992
+      },
+      {
+        "word": "human",
+        "weight": 3.288
+      },
+      {
+        "word": "world",
+        "weight": 3.069
+      },
+      {
+        "word": "adult anim",
+        "weight": 2.97
+      },
+      {
+        "word": "cyberpunk",
+        "weight": 2.946
+      },
+      {
+        "word": "chipmunk",
+        "weight": 2.935
+      },
+      {
+        "word": "robot",
+        "weight": 2.894
+      },
+      {
+        "word": "owl",
+        "weight": 2.887
+      }
+    ]
+  },
+  "co_occurrence_matrix": {
+    "Drama": {
+      "Drama": 2302,
+      "Comedy": 576,
+      "Thriller": 554,
+      "Action": 341,
+      "Romance": 606,
+      "Adventure": 185,
+      "Crime": 380,
+      "Science Fiction": 103,
+      "Horror": 84,
+      "Family": 121,
+      "Fantasy": 103,
+      "Animation": 26
+    },
+    "Comedy": {
+      "Drama": 576,
+      "Comedy": 1721,
+      "Thriller": 113,
+      "Action": 257,
+      "Romance": 484,
+      "Adventure": 223,
+      "Crime": 180,
+      "Science Fiction": 108,
+      "Horror": 78,
+      "Family": 299,
+      "Fantasy": 166,
+      "Animation": 125
+    },
+    "Thriller": {
+      "Drama": 554,
+      "Comedy": 113,
+      "Thriller": 1280,
+      "Action": 550,
+      "Romance": 65,
+      "Adventure": 203,
+      "Crime": 415,
+      "Science Fiction": 214,
+      "Horror": 292,
+      "Family": 7,
+      "Fantasy": 64,
+      "Animation": 9
+    },
+    "Action": {
+      "Drama": 341,
+      "Comedy": 257,
+      "Thriller": 550,
+      "Action": 1163,
+      "Romance": 63,
+      "Adventure": 469,
+      "Crime": 276,
+      "Science Fiction": 281,
+      "Horror": 76,
+      "Family": 62,
+      "Fantasy": 150,
+      "Animation": 37
+    },
+    "Romance": {
+      "Drama": 606,
+      "Comedy": 484,
+      "Thriller": 65,
+      "Action": 63,
+      "Romance": 899,
+      "Adventure": 67,
+      "Crime": 47,
+      "Science Fiction": 32,
+      "Horror": 15,
+      "Family": 52,
+      "Fantasy": 67,
+      "Animation": 13
+    },
+    "Adventure": {
+      "Drama": 185,
+      "Comedy": 223,
+      "Thriller": 203,
+      "Action": 469,
+      "Romance": 67,
+      "Adventure": 797,
+      "Crime": 56,
+      "Science Fiction": 205,
+      "Horror": 20,
+      "Family": 212,
+      "Fantasy": 196,
+      "Animation": 121
+    },
+    "Crime": {
+      "Drama": 380,
+      "Comedy": 180,
+      "Thriller": 415,
+      "Action": 276,
+      "Romance": 47,
+      "Adventure": 56,
+      "Crime": 697,
+      "Science Fiction": 19,
+      "Horror": 36,
+      "Family": 8,
+      "Fantasy": 10,
+      "Animation": 2
+    },
+    "Science Fiction": {
+      "Drama": 103,
+      "Comedy": 108,
+      "Thriller": 214,
+      "Action": 281,
+      "Romance": 32,
+      "Adventure": 205,
+      "Crime": 19,
+      "Science Fiction": 540,
+      "Horror": 95,
+      "Family": 58,
+      "Fantasy": 86,
+      "Animation": 36
+    },
+    "Horror": {
+      "Drama": 84,
+      "Comedy": 78,
+      "Thriller": 292,
+      "Action": 76,
+      "Romance": 15,
+      "Adventure": 20,
+      "Crime": 36,
+      "Science Fiction": 95,
+      "Horror": 520,
+      "Family": 1,
+      "Fantasy": 53,
+      "Animation": 1
+    },
+    "Family": {
+      "Drama": 121,
+      "Comedy": 299,
+      "Thriller": 7,
+      "Action": 62,
+      "Romance": 52,
+      "Adventure": 212,
+      "Crime": 8,
+      "Science Fiction": 58,
+      "Horror": 1,
+      "Family": 514,
+      "Fantasy": 150,
+      "Animation": 196
+    },
+    "Fantasy": {
+      "Drama": 103,
+      "Comedy": 166,
+      "Thriller": 64,
+      "Action": 150,
+      "Romance": 67,
+      "Adventure": 196,
+      "Crime": 10,
+      "Science Fiction": 86,
+      "Horror": 53,
+      "Family": 150,
+      "Fantasy": 435,
+      "Animation": 72
+    },
+    "Animation": {
+      "Drama": 26,
+      "Comedy": 125,
+      "Thriller": 9,
+      "Action": 37,
+      "Romance": 13,
+      "Adventure": 121,
+      "Crime": 2,
+      "Science Fiction": 36,
+      "Horror": 1,
+      "Family": 196,
+      "Fantasy": 72,
+      "Animation": 254
+    }
+  },
+  "fit_time_seconds": 0.72
 }

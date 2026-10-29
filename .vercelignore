@@ -1,0 +1,8 @@
+# Exclude raw training datasets and heavy offline pickles from Vercel Lambda
+data/
+models/*.pkl
+__pycache__/
+*.pyc
+.git/
+.vscode/
+.idea/

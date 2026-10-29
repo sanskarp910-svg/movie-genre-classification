@@ -1,191 +1,181 @@
-# 🎬 CineGenre AI: Movie Genre Classification & Recommendation Engine
+# 🎬 CineVerse AI: Multi-Label Movie & Anime Genre Classification & Recommendation Engine
 
-A full-stack, production-ready NLP machine learning application and interactive Streamlit web dashboard. CineGenre AI classifies movie synopses into primary genres using **TF-IDF Vectorization** and **Multinomial Naive Bayes (`MultinomialNB`)**, paired with a **Cosine Similarity Content-Based Recommendation Engine**.
+**Live Production Web App:** [https://movie-genre-classification-j8iw.vercel.app/](https://movie-genre-classification-j8iw.vercel.app/)
 
----
-
-## 🌟 Key Features
-
-1. **Automated Dual-Mode Data Pipeline**:
-   - Seamlessly ingests Kaggle's *The Movies Dataset* (`movies_metadata.csv` and `keywords.csv`).
-   - Automatically initializes a high-fidelity synthetic fallback dataset across 10 top genres if CSVs are missing, ensuring instant zero-configuration execution.
-2. **Robust NLP Preprocessing**:
-   - Safe parsing of JSON/Python literal columns (`genres` and `keywords`) using `ast.literal_eval`.
-   - Single-label primary genre extraction filtered to top 10 most frequent genres to resolve class imbalance.
-   - Text cleaning (lowercasing, punctuation/numerical removal, and stopword filtering).
-   - Fusion of plot synopses (`overview`) and thematic metadata (`keywords`).
-3. **Machine Learning & Analytics**:
-   - `TfidfVectorizer` (unigrams + bigrams, `max_features=5000`, sublinear term frequency scaling).
-   - `MultinomialNB` classifier from `scikit-learn`.
-   - Comprehensive model evaluation: overall Accuracy, full Classification Report (Precision, Recall, F1-Score), and high-resolution Confusion Matrix visualization (`confusion_matrix.png`).
-4. **Interactive Full-Stack Web Dashboard (Streamlit)**:
-   - **Tab 1: Genre Predictor & Recommender**: User-friendly input form with 1-click test presets, real-time genre prediction, probability distribution bar charts, and 3–5 content-based movie recommendations ranked by cosine similarity.
-   - **Tab 2: Dataset & Model Analytics**: Metric KPI cards, interactive genre distribution charts, per-genre precision/recall/F1 metrics, confusion matrix display, and a searchable movie database explorer.
+A production-grade, full-stack Natural Language Processing (NLP) system and recommendation engine. CineVerse AI classifies narrative synopses across **12 multi-label genres** using **sublinear TF-IDF (1 & 2-grams)** and **One-vs-Rest Balanced Logistic Regression** with calibrated sigmoid probabilities. It pairs predictions with **hybrid recommendations** ($0.60 \times \text{Cosine} + 0.25 \times \text{Genre Jaccard} + 0.15 \times \text{Rating}$), feature attribution, interactive Chart.js analytics, TMDB poster integration, and dark/light streaming themes.
 
 ---
 
-## 📁 Project Directory Structure
+## 🌟 Key Features & Architecture Upgrades
+
+### 1. Expanded Dataset & Multi-Label Modeling
+- **Scale:** Expanded from a 100-title single-label sample to **4,680+ clean titles** combining the TMDB 5000 cinema catalog with curated anime classics (*Demon Slayer, Ghost in the Shell, Spirited Away, Attack on Titan, Cowboy Bebop, Neon Genesis Evangelion*).
+- **Multi-Label Formulation:** Film and anime media inherently span multiple genres simultaneously. Modeled via 12 binary One-vs-Rest classifiers across: `Drama`, `Comedy`, `Thriller`, `Action`, `Romance`, `Adventure`, `Crime`, `Science Fiction`, `Horror`, `Family`, `Fantasy`, and `Animation`.
+- **Top 3 Genre Predictions:** Returns the top 3 genres with calibrated sigmoid probabilities ($P(C|x) = \frac{1}{1 + e^{-(w^T x + b)}}$) rather than uncalibrated single-label likelihoods.
+
+### 2. High-Performance Text Normalization & Feature Extraction
+- **Preprocessing:** Case folding, non-alphanumeric filtering, stop words pruning, and **Snowball morphological lemmatization** paired with a domain-specific irregular noun lookup dictionary (*superheroes → superhero, murderers → murder, detectives → detect*).
+- **TF-IDF Vectorizer:** 6,000 unigrams and bigrams with sublinear term frequency scaling ($tf = 1 + \ln(count)$) to dampen dominant repetitive words.
+
+### 3. Explainability & Diagnostics
+- **"Why this prediction?"**: Computes exact feature attribution contributions ($tfidf_i \times w_{c,i}$) to highlight the most influential tokens in the user's synopsis.
+- **Low-Confidence Ambiguity Alert:** Detects when the top 2 predicted probabilities are within 8% of each other, notifying the user of strong hybrid characteristics (e.g. Action/Sci-Fi hybrid).
+- **Interactive Feedback:** Thumbs Up / Thumbs Down feedback buttons with `localStorage` and REST API persistence.
+
+### 4. Hybrid Recommendation Engine
+- **3-Tier Objective Function:**
+  $$\text{Score} = 0.60 \times \text{Cosine Sim} + 0.25 \times \text{Genre Jaccard Overlap} + 0.15 \times \text{Normalized Rating}$$
+- **Dynamic Poster Fetching:** Queries the official TMDB API via `TMDB_API_KEY` (environment variable) with zero hardcoded secrets. If missing or offline, dynamically renders a dark cinema SVG poster fallback with title initials and genre badge.
+- **Live Filtering:** Instant filtering by genre, release year decade, and minimum star rating.
+- **Cinema Details Modal:** Displays full overview, keywords, score breakdown, and a 1-click **"▶ Watch Trailer"** link to YouTube official trailers.
+
+### 5. Interactive Analytics Tab (Chart.js)
+- **Genre Distribution:** Interactive doughnut chart across all 4,680 titles.
+- **Per-Genre Metrics:** Grouped bar chart comparing Precision, Recall, and F1-Score across all 12 classes.
+- **5-Fold Cross Validation Benchmark:** Compares Logistic Regression, LinearSVC, and Multinomial Naive Bayes.
+- **Genre Co-Occurrence Matrix:** Heatmap showing how frequently genres intersect (e.g., Action + Adventure, Romance + Drama).
+- **Top Predictive Words per Genre:** Interactive tabbed pills displaying the highest-weighted regression tokens per genre.
+
+### 6. Design & Accessibility
+- **Theme Toggle:** Dark Mode (electric orange `#FF640A` on `#141519` deep dark) and Light Mode (`#F4F6F9`) with `localStorage` persistence.
+- **Input Validation:** Minimum 15-word threshold with live word and character counters to guarantee sufficient feature density.
+- **Mobile Responsive & Accessible:** Responsive CSS grid/flexbox, semantic HTML5, ARIA labels, and keyboard navigation.
+
+---
+
+## 📊 Empirical Evaluation & Benchmarks
+
+All models were evaluated using Stratified Train/Test splits and rigorous **5-Fold Cross Validation**:
+
+| Metric | Score | Note |
+| :--- | :--- | :--- |
+| **Hamming Accuracy** | **86.68%** | Precision of binary decisions across all 12 genres |
+| **Micro F1-Score** | **67.72%** | **Exceeds target of 60%+** |
+| **Macro F1-Score** | **65.54%** | Balanced across both majority and minority genres |
+| **Top-3 Any Hit Rate** | **96.79%** | Percentage of test samples where at least 1 true genre is in top 3 |
+| **Top-3 Genre Recall** | **74.44%** | Fraction of all true genres captured within top 3 predictions |
+| **Exact Match Accuracy** | **19.34%** | Strict all-or-nothing subset match |
+
+### 5-Fold Cross Validation Comparison
+
+| Model | Mean Hamming Acc | Mean Micro F1 | Mean Macro F1 | CV Fit Time |
+| :--- | :---: | :---: | :---: | :---: |
+| **Logistic Regression (Balanced)** | **86.35% (±0.28%)** | **66.68% (±0.71%)** | **63.98% (±0.95%)** | 4.17s |
+| **LinearSVC (Balanced)** | 85.95% (±0.32%) | 64.31% (±0.92%) | 61.13% (±0.79%) | 3.99s |
+| **Multinomial Naive Bayes** | 86.55% (±0.42%) | 58.50% (±1.43%) | 46.35% (±1.42%) | 1.03s |
+
+*Selected Architecture: One-vs-Rest Logistic Regression provides the highest Micro-F1 and Macro-F1 with well-calibrated continuous sigmoid probabilities.*
+
+---
+
+## 📁 Repository Structure
 
 ```text
 movie_genre_app/
 │
-├── data/                   # Directory for CSV datasets (or fallback generator)
-│   ├── movies_metadata.csv # Kaggle movie metadata or generated fallback
-│   └── keywords.csv        # Kaggle keywords or generated fallback
+├── api/
+│   └── index.py            # Vercel Serverless Function (Pure Python Flask inference, UI & REST API)
 │
-├── models/                 # Saved model artifacts
-│   ├── tfidf_vectorizer.pkl
-│   ├── genre_classifier.pkl
-│   ├── processed_movies.pkl
-│   ├── tfidf_matrix.pkl
-│   ├── metrics.json
-│   └── confusion_matrix.png
+├── data/
+│   ├── tmdb_5000_movies.csv# Ingested TMDB catalog (4,803 titles)
+│   ├── movies_metadata.csv # Legacy metadata fallback
+│   └── keywords.csv        # Thematic keywords fallback
+│
+├── models/
+│   ├── serverless_model.json# Compact serialized bundle (weights, intercepts, vocab, IDF, movies)
+│   ├── metrics.json        # Evaluation metrics, benchmark tables, and co-occurrence matrix
+│   ├── confusion_matrix.png# High-res confusion matrix heatmap
+│   ├── tfidf_vectorizer.pkl# Scikit-learn TF-IDF vectorizer artifact
+│   └── multi_label_model.pkl# OneVsRest classifier artifact
 │
 ├── src/
 │   ├── __init__.py
-│   ├── preprocess.py       # Data loading, JSON parsing, text cleaning, feature combination
-│   ├── train.py            # Model training, evaluation metrics, confusion matrix plot, serialization
-│   └── recommend.py        # Inference script for genre prediction & TF-IDF cosine recommendations
+│   ├── preprocess.py       # Data loading, multi-label parsing, Snowball lemmatization
+│   ├── train.py            # 5-fold CV, evaluation metrics, confusion matrix, export
+│   └── recommend.py        # Multi-label inference and hybrid recommendation engine
 │
-├── app.py                  # Streamlit Interactive Web Dashboard (UI / Website)
-├── requirements.txt        # Dependencies: pandas, numpy, scikit-learn, matplotlib, seaborn, nltk, streamlit, joblib
-└── README.md               # Clear step-by-step instructions to install, train, and launch the app
+├── app.py                  # Streamlit Interactive Web Dashboard (Local & Community Cloud)
+├── requirements.txt        # Vercel deployment dependencies (Flask only: bundle < 15MB)
+├── requirements-full.txt   # Complete training & Streamlit dependencies (scikit-learn, pandas, etc.)
+├── vercel.json             # Vercel routing configuration
+├── .vercelignore           # Excludes heavy raw training files from serverless lambda
+└── README.md               # Complete setup, architecture, and deployment documentation
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Installation & Local Execution
 
-### 1. Prerequisites
-- Python 3.9, 3.10, or 3.11 installed.
-
-### 2. Environment Setup & Dependency Installation
-Navigate to the project root directory and install dependencies:
-
+### 1. Clone & Environment Setup
 ```bash
-cd movie_genre_app
-pip install -r requirements.txt
+git clone https://github.com/sanskarp910-svg/movie-genre-classification.git
+cd movie-genre-classification
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
+
+# Install full dependencies for training and Streamlit
+pip install -r requirements-full.txt
 ```
 
-### 3. (Optional) Provide Real Kaggle Dataset
-If you wish to run on Kaggle's full *Movies Metadata Dataset*:
-1. Download `movies_metadata.csv` and `keywords.csv` from [Kaggle's The Movies Dataset](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset).
-2. Place both files into the `movie_genre_app/data/` folder.
-> *Note: If no CSV files are added, the system automatically creates and uses the built-in realistic fallback dataset.*
-
-### 4. Train the ML Model & Generate Artifacts
-Run the standalone training script:
-
+### 2. Retrain the Pipeline (Optional)
+To retrain the model, run 5-fold cross-validation, and regenerate all artifacts:
 ```bash
 python src/train.py
 ```
 
-This will:
-- Ingest and preprocess the dataset.
-- Filter to the top 10 balanced genres.
-- Extract unigram and bigram TF-IDF representations.
-- Train the Naive Bayes classifier.
-- Calculate and display overall accuracy and the classification report in your console.
-- Generate and save `models/confusion_matrix.png` and `confusion_matrix.png`.
-- Serialize the model and precomputed vectors into `models/`.
-
-### 5. Launch the Streamlit Web Application
-Start the interactive dashboard:
-
+### 3. Run the Streamlit Dashboard
 ```bash
 streamlit run app.py
 ```
+Open [http://localhost:8501](http://localhost:8501) in your browser.
 
-Once launched, your web browser will automatically open to `http://localhost:8501`.
-
----
-
-## 🖥️ Using the Interactive Dashboard
-
-### Tab 1: Genre Predictor & Recommender
-- **Demonstration Presets**: Select any sample from the dropdown (e.g. *Sci-Fi Odyssey*, *Superhero Vigilante*, *Teen Comedy*, *Supernatural Horror*) to auto-populate the inputs instantly.
-- **Custom Input**: Type any movie plot synopsis in the **Overview** box and keywords in the **Keywords** box.
-- **Predict**: Click **"Classify Genre & Recommend Similar Movies"**.
-  - Review the **Predicted Primary Genre** badge and confidence percentage.
-  - Explore the **Genre Probability Breakdown** chart showing confidence across all classes.
-  - Browse **3–5 similar content recommendations** showing titles, genres, cosine match scores, and overviews.
-
-### Tab 2: Dataset & Model Analytics
-- View **KPI Metric Cards**: Model Accuracy, Total Movies, Feature Vocabulary Size, and Evaluation Test Split.
-- Examine the **Target Genre Distribution** bar chart.
-- Inspect the **Confusion Matrix** heatmap image displaying true vs. predicted classifications.
-- Review the **Per-Genre Precision, Recall, and F1-score** table.
-- Search the entire movie corpus using the **Corpus Database Explorer**.
-
----
-
-## 🧪 Testing the Recommendation Engine in CLI
-You can also run inference directly from the command line:
-
+### 4. Run the Full-Stack Serverless App Locally
 ```bash
-python src/recommend.py
+python api/index.py
 ```
+Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ---
 
-## 🌐 Deployment Guide (GitHub & Vercel)
+## 🌐 TMDB Poster API Configuration
 
-This project is dual-configured:
-1. **Vercel Serverless Deployment**: Powered by `vercel.json` and `api/index.py` (Flask REST API + modern full-stack web UI with 0ms cold starts).
-2. **Streamlit Deployment**: Powered by `app.py` (Streamlit UI for local execution or Streamlit Community Cloud).
+To enable real poster thumbnails for recommendations:
+1. Register for a free account at [The Movie Database (TMDB)](https://www.themoviedb.org/).
+2. Generate an API Key under **Settings → API**.
+3. Set the environment variable:
+   - **Locally:**
+     ```bash
+     # Windows PowerShell
+     $env:TMDB_API_KEY="your_tmdb_api_key_here"
+
+     # Linux / macOS
+     export TMDB_API_KEY="your_tmdb_api_key_here"
+     ```
+   - **Vercel Cloud:**
+     Go to **Project Settings → Environment Variables** on your Vercel dashboard and add:
+     - `Key`: `TMDB_API_KEY`
+     - `Value`: `<your_tmdb_api_key>`
+
+> *Graceful Fallback:* If no `TMDB_API_KEY` is provided, CineVerse AI automatically renders an inline SVG poster placeholder with title initials and genre branding, ensuring the interface never displays broken images.
 
 ---
 
-### Step 1: Push to GitHub
+## 🚢 Vercel Deployment
 
-1. Create a new repository on [GitHub](https://github.com/new) (e.g. `movie-genre-classification`). Leave it empty (do **not** check initialize with README/license).
-2. Open PowerShell or terminal in `movie_genre_app`:
+1. The project includes `vercel.json` configured with `@vercel/python`.
+2. `requirements.txt` is kept lightweight (`flask>=3.0.0`) so the serverless lambda deploys in seconds and remains far below Vercel's 250MB limit.
+3. Push to `main` branch to trigger automatic Vercel build and deployment:
    ```bash
-   cd movie_genre_app
-
-   # Link your GitHub repository (replace with your actual GitHub username and repository name)
-   git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY_NAME>.git
-
-   # Push to main branch
-   git push -u origin main
+   git add .
+   git commit -m "feat: upgrade to multi-label classification, hybrid recommendations, and interactive analytics"
+   git push origin main
    ```
 
 ---
 
-### Step 2: Deploy to Vercel (1-Click via GitHub)
-
-1. Go to [Vercel](https://vercel.com/) and sign in with your GitHub account.
-2. Click **"Add New..."** ➔ **"Project"**.
-3. Select your GitHub repository from the list and click **"Import"**.
-4. In the Project Configuration:
-   - **Framework Preset**: *Other* (Vercel will automatically read `vercel.json`)
-   - **Root Directory**: `./` (or leave default)
-5. Click **"Deploy"**.
-6. Within 60 seconds, your project will be live with a production HTTPS URL (e.g. `https://movie-genre-app.vercel.app`)!
-
-#### Deploying via Vercel CLI (Alternative):
-```bash
-npm install -g vercel
-cd movie_genre_app
-vercel
-```
-
----
-
-### Step 3 (Optional): Deploy Streamlit UI to Streamlit Community Cloud
-
-If you also wish to host the native Streamlit dashboard publicly for free:
-1. Go to [share.streamlit.io](https://share.streamlit.io/) and log in with GitHub.
-2. Click **"New app"**.
-3. Select your repository, set **Branch** to `main`, and **Main file path** to `app.py`.
-4. Click **"Deploy!"**.
-
----
-
-## 🛠️ Technology Stack
-- **Language**: Python 3.11
-- **NLP & Feature Engineering**: TF-IDF (`scikit-learn`), Regular Expressions (`re`), Safe JSON Parsing (`ast.literal_eval`), NLTK Stopwords
-- **Machine Learning**: `MultinomialNB` (`scikit-learn`)
-- **Data Manipulation**: `pandas`, `numpy`
-- **Visualization**: `matplotlib`, `seaborn`, `streamlit`
-- **Model Serialization**: `joblib`
+## 📜 License & Acknowledgments
+- **Dataset:** TMDB 5000 Movies Dataset & Kaggle Movies Dataset.
+- **Frameworks:** Python, Scikit-Learn, Flask, Streamlit, Chart.js.
