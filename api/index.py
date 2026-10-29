@@ -998,7 +998,7 @@ HTML_TEMPLATE = """
         <span class="search-lens-icon">🎬</span>
         <textarea id="plot" 
                   class="expandable-textarea" 
-                  placeholder="Type or paste a movie storyline, plot, or scene to classify genres & match films (min. 15 words)..." 
+                  placeholder="Type or paste any movie storyline, plot, or scene to classify genres & match films..." 
                   rows="1" 
                   oninput="updateWordCount()"
                   onfocus="expandTypebar()"></textarea>
@@ -1011,7 +1011,7 @@ HTML_TEMPLATE = """
       <div class="search-expanded-tray">
         <div class="tray-inner">
           <div class="counter-row">
-            <span id="word-badge" class="counter-badge counter-invalid">0 / 15 words minimum</span>
+            <span id="word-badge" class="counter-badge">0 words</span>
             <span id="char-badge">0 characters</span>
           </div>
 
@@ -1032,11 +1032,6 @@ HTML_TEMPLATE = """
                 <option value="animation">Spirited Away (Anime • Spirit Bathhouse)</option>
               </select>
             </div>
-          </div>
-
-          <!-- Word Count Alert -->
-          <div id="validation-alert" class="validation-alert">
-            <span>⚠️</span> <span id="validation-msg">Please enter at least 15 words for reliable NLP feature classification (currently 0 words).</span>
           </div>
 
           <!-- Action Toolbar -->
@@ -1340,17 +1335,8 @@ HTML_TEMPLATE = """
       const charCount = text.length;
 
       const badge = document.getElementById('word-badge');
-      if (wordCount >= 15) {
-        badge.innerText = `${wordCount} words (Full NLP calibrated)`;
-        badge.className = "counter-badge counter-valid";
-        document.getElementById('validation-alert').style.display = "none";
-      } else if (wordCount > 0) {
-        badge.innerText = `${wordCount} words (15+ recommended)`;
-        badge.className = "counter-badge";
-      } else {
-        badge.innerText = `0 words`;
-        badge.className = "counter-badge counter-invalid";
-      }
+      badge.innerText = `${wordCount} word${wordCount === 1 ? '' : 's'}`;
+      badge.className = "counter-badge" + (wordCount > 0 ? " counter-valid" : "");
       document.getElementById('char-badge').innerText = `${charCount} characters`;
       
       if (text.length > 0) {
@@ -1474,15 +1460,6 @@ HTML_TEMPLATE = """
         expandTypebar();
         document.getElementById('plot').focus();
         return;
-      }
-
-      const words = plot.split(/\s+/).filter(w => w.length > 0);
-      if (words.length > 0 && words.length < 15) {
-        const alertBox = document.getElementById('validation-alert');
-        document.getElementById('validation-msg').innerText = `⚡ Quick synopsis mode (${words.length} words). Pro tip: entering 15+ words activates deeper multi-label calibrated precision.`;
-        alertBox.style.display = "flex";
-      } else {
-        document.getElementById('validation-alert').style.display = "none";
       }
       
       const errAlert = document.getElementById('error-alert');

@@ -401,7 +401,7 @@ with st.form("prediction_form", clear_on_submit=False):
     
     with col_input1:
         input_overview = st.text_area(
-            "Plot Overview / Synopsis (15 words minimum):",
+            "Plot Overview / Synopsis:",
             value=preset_data["overview"],
             placeholder="e.g. A young ninja with a sealed spirit beast inside him trains relentlessly to earn the respect of his village and become the ultimate leader...",
             height=150,
@@ -422,9 +422,8 @@ with st.form("prediction_form", clear_on_submit=False):
     submit_btn = st.form_submit_button("⚡ Classify Genres & Match Films", use_container_width=True, type="primary")
 
 if submit_btn or (input_overview.strip() and selected_preset_key != "Select an archetype preset..."):
-    words = input_overview.strip().split()
-    if len(words) < 15:
-        st.error(f"Please enter at least 15 words for reliable NLP feature classification (currently {len(words)} words).")
+    if not input_overview.strip():
+        st.warning("Please enter a synopsis to classify genres.")
     else:
         with st.spinner("Analyzing narrative features with Multi-Label OneVsRest Pipeline..."):
             pred_result = engine.predict_genres(input_overview, input_keywords, top_k=3)

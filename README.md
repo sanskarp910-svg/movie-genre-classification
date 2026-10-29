@@ -13,7 +13,7 @@ A production-grade, full-stack Natural Language Processing (NLP) system and reco
 ### 1. Minimalist Letterboxd Cinema Aesthetic & Expandable Typebar
 - **Branding:** Renamed to **Cinemix ▶** featuring the signature play icon badge and Letterboxd's iconic tri-color dots motif (`#00e054` green, `#ff8000` orange, `#40bcf4` blue).
 - **Letterboxd Theme:** Deep matte charcoal canvas (`#14181c`), dark slate cards (`#1c2228`), soft blue-gray metadata typography (`#99aabb`), star ratings in signature green (`★ 8.4`), and hover-outline poster cards.
-- **Hover Expandable Typebar:** Ultra-minimalist hero centered on the site name `CINEMIX ▶` with a sleek, compact input bar that smoothly expands on hover or focus to reveal the narrative synopsis field, live word counter (15-word threshold), archetype presets, and classification controls.
+- **Hover Expandable Typebar:** Ultra-minimalist hero centered on the site name `CINEMIX ▶` with a sleek, compact input bar that smoothly expands on hover or focus to reveal the narrative synopsis field, live word counter, archetype presets, and classification controls without word count limitations.
 - **Navbar About Modal:** Located right next to the Dark/Light theme toggle button, providing an interactive modal explaining the platform purpose and the 5-stage NLP architecture in plain, accessible language.
 - **Dark / Light Theme Toggle:** Seamless toggle between the authentic Letterboxd dark mode and a crisp paper light mode (`#f0f3f6`), persisted via `localStorage`.
 
