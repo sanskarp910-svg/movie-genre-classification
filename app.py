@@ -1,6 +1,6 @@
 """
-Movie & Anime Genre Classification & Hybrid Recommender Dashboard (Streamlit).
-Multi-label NLP Classification with TF-IDF, Logistic Regression, and Cosine-Overlap Recommendations.
+Cinemix ▶ - Movie & Anime Genre Classification & Hybrid Recommender Dashboard (Streamlit).
+Letterboxd-inspired Cinema Design System with Multi-Label NLP Classification.
 """
 
 import os
@@ -15,7 +15,7 @@ import numpy as np
 
 # Page Configuration - Must be first Streamlit command
 st.set_page_config(
-    page_title="CineVerse AI | Movie & Anime Multi-Label Genre Classifier",
+    page_title="Cinemix ▶ | Film & Anime Genre Classifier & Recommender",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -30,144 +30,170 @@ DATA_DIR = APP_DIR / "data"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-# Custom CSS for Sleek Anime Streaming Dark & Vibrant Orange Theme
+# Custom CSS for Authentic Letterboxd Cinema Aesthetic (#14181c, #00e054, #ff8000, #40bcf4)
 st.markdown("""
 <style>
-    /* Global Background & Font */
+    /* Global Letterboxd Matte Slate & Clean Typography */
     .stApp {
-        background-color: #141519;
-        color: #F7F7F8;
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #14181c;
+        color: #ffffff;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
     /* Brand Header */
-    .brand-logo-icon {
+    .brand-title-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .main-header {
+        font-size: 2.3rem;
+        font-weight: 900;
+        color: #ffffff;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+    }
+    .play-icon-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
-        background-color: #FF640A;
-        color: #000000 !important;
+        width: 32px;
+        height: 32px;
+        background-color: #00e054;
+        color: #14181c !important;
+        font-size: 0.95rem;
         font-weight: 900;
-        font-size: 1.1rem;
-        border-radius: 50%;
-        margin-right: 0.6rem;
+        border-radius: 4px;
+        margin-left: 0.2rem;
+        box-shadow: 0 0 12px rgba(0, 224, 84, 0.35);
         vertical-align: middle;
-        box-shadow: 0 0 16px rgba(255, 100, 10, 0.35);
     }
-    .main-header {
-        font-size: 2.2rem;
-        font-weight: 900;
-        color: #FFFFFF;
+    .lb-dots-wrap {
         display: inline-flex;
         align-items: center;
-        margin-bottom: 0.2rem;
-        letter-spacing: -0.02em;
+        gap: 5px;
+        margin-left: 0.6rem;
+        padding: 0.25rem 0.55rem;
+        background: #242c34;
+        border-radius: 12px;
+        border: 1px solid #2c3440;
+        vertical-align: middle;
     }
-    .orange-text {
-        color: #FF640A;
+    .lb-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
     }
+    .dot-green { background-color: #00e054; }
+    .dot-orange { background-color: #ff8000; }
+    .dot-blue { background-color: #40bcf4; }
+
     .sub-header {
-        color: #A0A0B2;
+        color: #99aabb;
         font-size: 0.95rem;
         margin-bottom: 1.6rem;
     }
 
-    /* Metric Card Styling */
+    /* Metric Card Styling (Letterboxd Surface) */
     .metric-card {
-        background-color: #1E1F25;
-        border: 1px solid #2D2F37;
-        border-top: 3px solid #FF640A;
-        border-radius: 8px;
+        background-color: #1c2228;
+        border: 1px solid #2c3440;
+        border-top: 3px solid #00e054;
+        border-radius: 4px;
         padding: 1.25rem;
         color: white;
         text-align: center;
         transition: transform 0.2s ease, border-color 0.2s ease;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
     .metric-card:hover {
         transform: translateY(-2px);
-        border-color: #FF640A;
+        border-color: #00e054;
     }
     .metric-value {
         font-size: 2.2rem;
         font-weight: 900;
-        color: #FF640A;
+        color: #00e054;
         margin: 0.2rem 0;
     }
     .metric-label {
-        font-size: 0.8rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: #A0A0B2;
-        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #99aabb;
+        font-weight: 800;
     }
 
     /* Prediction Result Banner */
     .prediction-box {
-        background: linear-gradient(135deg, #1E1F25 0%, #16171C 100%);
-        border: 1px solid #2D2F37;
-        border-left: 6px solid #FF640A;
-        border-radius: 8px;
+        background: #1c2228;
+        border: 1px solid #2c3440;
+        border-left: 5px solid #00e054;
+        border-radius: 4px;
         padding: 1.4rem 1.6rem;
         margin: 1.2rem 0;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
     .genre-badge {
         display: inline-block;
-        background-color: #FF640A;
-        color: #FFFFFF;
-        padding: 0.4rem 1.2rem;
-        border-radius: 6px;
+        background-color: #00e054;
+        color: #14181c;
+        padding: 0.35rem 1.1rem;
+        border-radius: 4px;
         font-weight: 900;
-        font-size: 1.35rem;
+        font-size: 1.3rem;
         letter-spacing: -0.01em;
-        box-shadow: 0 0 14px rgba(255, 100, 10, 0.35);
+        box-shadow: 0 0 14px rgba(0, 224, 84, 0.3);
     }
     
     /* Movie Recommendation Card */
     .rec-card {
-        background-color: #1E1F25;
-        border: 1px solid #2D2F37;
-        border-radius: 8px;
+        background-color: #1c2228;
+        border: 1px solid #2c3440;
+        border-radius: 4px;
         padding: 1.2rem;
         margin-bottom: 0.9rem;
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .rec-card:hover {
         transform: translateY(-2px);
-        border-color: #FF640A;
-        box-shadow: 0 4px 18px rgba(255, 100, 10, 0.2);
+        border-color: #00e054;
+        box-shadow: 0 0 16px rgba(0, 224, 84, 0.25);
     }
     .rec-title {
         font-size: 1.15rem;
         font-weight: 800;
-        color: #FFFFFF;
+        color: #ffffff;
         margin-bottom: 0.2rem;
     }
     .genre-pill {
-        background-color: #2D2F37;
-        color: #E2E2EC;
+        background-color: #242c34;
+        color: #99aabb;
         padding: 0.18rem 0.6rem;
-        border-radius: 4px;
-        font-size: 0.78rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
         font-weight: 700;
         margin-right: 0.5rem;
-        border: 1px solid #3A3D47;
+        border: 1px solid #2c3440;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
     .sim-badge {
-        background-color: rgba(255, 100, 10, 0.15);
-        border: 1px solid #FF640A;
-        color: #FF640A;
+        background-color: rgba(0, 224, 84, 0.12);
+        border: 1px solid #00e054;
+        color: #00e054;
         padding: 0.18rem 0.55rem;
-        border-radius: 4px;
-        font-size: 0.78rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
         font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
     }
     .rec-overview {
         font-size: 0.88rem;
-        color: #A0A0B2;
+        color: #99aabb;
         line-height: 1.5;
         margin-top: 0.45rem;
     }
@@ -175,14 +201,33 @@ st.markdown("""
     /* Word Chips */
     .word-chip {
         display: inline-block;
-        background: #24262E;
-        border: 1px solid #2E303A;
-        border-radius: 6px;
+        background: #242c34;
+        border: 1px solid #2c3440;
+        border-radius: 4px;
         padding: 0.25rem 0.6rem;
         margin: 0.2rem;
         font-size: 0.82rem;
         font-weight: 700;
-        color: #FFFFFF;
+        color: #ffffff;
+    }
+
+    /* Primary Letterboxd Green Buttons */
+    .stButton > button {
+        background-color: #00e054 !important;
+        color: #14181c !important;
+        font-weight: 900 !important;
+        border: none !important;
+        border-radius: 4px !important;
+        letter-spacing: 0.06em !important;
+        text-transform: uppercase !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 10px rgba(0, 224, 84, 0.3) !important;
+    }
+    .stButton > button:hover {
+        background-color: #00c030 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 16px rgba(0, 224, 84, 0.45) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -259,10 +304,10 @@ SAMPLE_PRESETS = {
 
 # --- SIDEBAR ---
 with st.sidebar:
-    st.markdown("## 🎬 Project Architecture")
+    st.markdown("## 🎬 Cinemix ▶ Intelligence")
     st.markdown("""
-    **Multi-Label Movie & Anime Classification (NLP)**
-    * **Algorithm:** One-vs-Rest Logistic Regression (Balanced)
+    **Multi-Label Film & Anime Classification (Letterboxd Style)**
+    * **Algorithm:** One-vs-Rest Balanced Logistic Regression
     * **Text Vectorizer:** Sublinear TF-IDF (1 & 2-grams, 6,000 features)
     * **Stemming:** Snowball Stemmer + Lemmatization Dictionary
     * **Classes:** 12 Multi-Label Genres
@@ -293,8 +338,18 @@ with st.sidebar:
 
 
 # --- MAIN HEADER ---
-st.markdown('<div class="main-header"><span class="brand-logo-icon">▷</span> CINE<span class="orange-text">VERSE</span> AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Multi-Label NLP Classification & Hybrid Content Recommender across 4,680+ cinema and anime titles.</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="brand-title-wrap">
+    <span class="main-header">CINEMIX</span>
+    <span class="play-icon-badge">▶</span>
+    <div class="lb-dots-wrap" title="Cinemix Film Intelligence">
+        <span class="lb-dot dot-green"></span>
+        <span class="lb-dot dot-orange"></span>
+        <span class="lb-dot dot-blue"></span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Letterboxd-styled Multi-Label NLP Classification & Hybrid Content Recommender across 4,680+ titles.</div>', unsafe_allow_html=True)
 
 # Check model availability; offer training prompt if absent
 engine, load_error = load_app_engine()
@@ -316,8 +371,8 @@ if engine is None or not engine.is_ready():
 
 # --- TABS INTERFACE ---
 tab1, tab2 = st.tabs([
-    "🎯 Genre Predictor & Recommender",
-    "📈 Dataset & Model Analytics"
+    "🎯 Predict & Recommend",
+    "📈 Dataset Analytics"
 ])
 
 
@@ -358,7 +413,7 @@ with tab1:
             
             top_rec_count = st.slider("Number of Recommendations:", min_value=3, max_value=8, value=4)
 
-        submit_btn = st.form_submit_button("⚡ Classify Genres & Discover Similar Titles", use_container_width=True, type="primary")
+        submit_btn = st.form_submit_button("⚡ Classify Genres & Match Films", use_container_width=True, type="primary")
 
     if submit_btn or (input_overview.strip() and selected_preset_key != "Select an archetype preset..."):
         words = input_overview.strip().split()
@@ -375,13 +430,13 @@ with tab1:
 
             st.markdown(f"""
             <div class="prediction-box">
-                <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 700;">
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #99aabb; font-weight: 800;">
                     Primary Genre Classification
                 </div>
                 <div style="margin-top: 0.4rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
                     <span class="genre-badge">{primary_genre}</span>
-                    <span style="font-size: 1.15rem; color: #E2E8F0;">
-                        Calibrated Probability: <strong style="color:#FF640A;">{primary_pct}</strong>
+                    <span style="font-size: 1.15rem; color: #ffffff;">
+                        Calibrated Probability: <strong style="color:#00e054;">{primary_pct}</strong>
                     </span>
                 </div>
             </div>
@@ -410,7 +465,7 @@ with tab1:
             inf_words = pred_result.get("influential_words", [])
             if inf_words:
                 st.markdown("#### 🔍 Why this prediction? (Top Influential Narrative Signals)")
-                chips_html = "".join([f'<span class="word-chip">{w["word"]} <span style="color:#FF640A;">+{w["impact"]}</span></span>' for w in inf_words])
+                chips_html = "".join([f'<span class="word-chip">{w["word"]} <span style="color:#00e054;">+{w["impact"]}</span></span>' for w in inf_words])
                 st.markdown(chips_html, unsafe_allow_html=True)
 
             # --- RECOMMENDATION CARDS ---
@@ -432,7 +487,7 @@ with tab1:
                         <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
                             <div class="rec-title">#{idx}. {movie['title']} ({year})</div>
                             <div>
-                                <span class="genre-pill">⭐ {rating:.1f}/10</span>
+                                <span class="genre-pill">★ {rating:.1f}/10</span>
                                 <span class="genre-pill">{genres_str}</span>
                                 <span class="sim-badge">Match: {sim_pct}</span>
                             </div>
@@ -440,7 +495,7 @@ with tab1:
                         <div class="rec-overview">
                             {movie['overview']}
                         </div>
-                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #94A3B8;">
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #99aabb;">
                             <strong>Themes:</strong> {movie.get('keywords', 'N/A')}
                         </div>
                     </div>
@@ -467,7 +522,7 @@ with tab2:
             <div class="metric-card">
                 <div class="metric-label">Hamming Accuracy</div>
                 <div class="metric-value">{metrics.get('hamming_accuracy', 0.0) * 100:.1f}%</div>
-                <div style="font-size: 0.8rem; color: #34D399;">Multi-Label Precision</div>
+                <div style="font-size: 0.8rem; color: #00e054;">Multi-Label Precision</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -476,7 +531,7 @@ with tab2:
             <div class="metric-card">
                 <div class="metric-label">Micro F1-Score</div>
                 <div class="metric-value">{metrics.get('micro_f1', 0.0) * 100:.1f}%</div>
-                <div style="font-size: 0.8rem; color: #FF8A3D;">Global Harmonic Mean</div>
+                <div style="font-size: 0.8rem; color: #40bcf4;">Global Harmonic Mean</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -485,7 +540,7 @@ with tab2:
             <div class="metric-card">
                 <div class="metric-label">Top-3 Hit Rate</div>
                 <div class="metric-value">{metrics.get('top3_hit_rate', 0.0) * 100:.1f}%</div>
-                <div style="font-size: 0.8rem; color: #34D399;">At Least 1 True Genre Hit</div>
+                <div style="font-size: 0.8rem; color: #00e054;">At Least 1 True Genre Hit</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -494,7 +549,7 @@ with tab2:
             <div class="metric-card">
                 <div class="metric-label">Catalog Titles</div>
                 <div class="metric-value">{metrics.get('dataset_size', 0):,}</div>
-                <div style="font-size: 0.8rem; color: #94A3B8;">TMDB 5000 + Curated Anime</div>
+                <div style="font-size: 0.8rem; color: #99aabb;">TMDB 5000 + Curated Anime</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -511,7 +566,7 @@ with tab2:
                     list(genre_dist.items()),
                     columns=["Genre", "Movie Count"]
                 ).set_index("Genre")
-                st.bar_chart(dist_df, color="#FF640A", height=320)
+                st.bar_chart(dist_df, color="#00e054", height=320)
 
         with col_bm:
             st.markdown("#### ⚖️ 5-Fold Cross Validation Benchmark")
