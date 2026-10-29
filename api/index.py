@@ -1072,15 +1072,15 @@ HTML_TEMPLATE = """
       <div class="skeleton-card" style="height: 180px;"></div>
     </div>
 
-    <!-- Output Section -->
-    <section id="result-section" style="display: none;">
+    <!-- Output Section (Always visible with Featured Content, dynamically updated on classification) -->
+    <section id="result-section">
       <!-- Low Confidence Alert -->
-      <div id="low-conf-alert" class="low-confidence-alert">
+      <div id="low-conf-alert" class="low-confidence-alert" style="display: none;">
         <span>⚠️</span> <span id="low-conf-text"></span>
       </div>
 
-      <!-- Top 3 Genre Prediction Card -->
-      <div class="prediction-hero">
+      <!-- Top 3 Genre Prediction Card (Revealed upon classification) -->
+      <div class="prediction-hero" id="prediction-hero" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div>
             <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.08em;">
@@ -1120,10 +1120,12 @@ HTML_TEMPLATE = """
       </div>
 
       <!-- Recommendations Header & Filters -->
-      <div style="margin-top: 2.5rem; margin-bottom: 1rem;">
-        <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--text);">Similar Films & Recommendations</h2>
-        <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.25rem;">
-          Hybrid scoring combining TF-IDF Cosine Similarity (60%), Multi-label Genre Jaccard Overlap (25%), and Quality Ratings (15%).
+      <div style="margin-top: 2rem; margin-bottom: 1.25rem;">
+        <h2 id="catalog-heading" style="font-size: 1.6rem; font-weight: 900; color: var(--text);">
+          ⭐ Featured Cinema & Anime Highlights
+        </h2>
+        <p id="catalog-subheading" style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Discover top-rated cinematic masterpieces and anime classics. Type or paste any storyline above to predict multi-label genres and match similar films.
         </p>
       </div>
 
@@ -1338,11 +1340,15 @@ HTML_TEMPLATE = """
       const charCount = text.length;
 
       const badge = document.getElementById('word-badge');
-      badge.innerText = `${wordCount} / 15 words minimum`;
       if (wordCount >= 15) {
+        badge.innerText = `${wordCount} words (Full NLP calibrated)`;
         badge.className = "counter-badge counter-valid";
         document.getElementById('validation-alert').style.display = "none";
+      } else if (wordCount > 0) {
+        badge.innerText = `${wordCount} words (15+ recommended)`;
+        badge.className = "counter-badge";
       } else {
+        badge.innerText = `0 words`;
         badge.className = "counter-badge counter-invalid";
       }
       document.getElementById('char-badge').innerText = `${charCount} characters`;
@@ -1377,8 +1383,11 @@ HTML_TEMPLATE = """
       document.getElementById('keywords').value = "";
       document.getElementById('presets').value = "";
       updateWordCount();
-      document.getElementById('result-section').style.display = "none";
+      document.getElementById('prediction-hero').style.display = "none";
+      document.getElementById('catalog-heading').innerText = "⭐ Featured Cinema & Anime Highlights";
+      document.getElementById('catalog-subheading').innerText = "Discover top-rated cinematic masterpieces and anime classics. Type or paste any storyline above to predict multi-label genres and match similar films.";
       collapseTypebar(true);
+      loadInitialCatalog();
     }
 
     // Theme Toggle
@@ -1461,20 +1470,24 @@ HTML_TEMPLATE = """
       const plot = document.getElementById('plot').value.trim();
       const keywords = document.getElementById('keywords').value.trim();
 
-      const words = plot.split(/\s+/).filter(w => w.length > 0);
-      if (words.length < 15) {
-        const alertBox = document.getElementById('validation-alert');
-        document.getElementById('validation-msg').innerText = `Please enter at least 15 words for reliable NLP classification (currently ${words.length} words). Try selecting a preset above or click 🎲 Random Example!`;
-        alertBox.style.display = "flex";
+      if (!plot && !keywords) {
         expandTypebar();
         document.getElementById('plot').focus();
         return;
       }
-      document.getElementById('validation-alert').style.display = "none";
+
+      const words = plot.split(/\s+/).filter(w => w.length > 0);
+      if (words.length > 0 && words.length < 15) {
+        const alertBox = document.getElementById('validation-alert');
+        document.getElementById('validation-msg').innerText = `⚡ Quick synopsis mode (${words.length} words). Pro tip: entering 15+ words activates deeper multi-label calibrated precision.`;
+        alertBox.style.display = "flex";
+      } else {
+        document.getElementById('validation-alert').style.display = "none";
+      }
+      
       const errAlert = document.getElementById('error-alert');
       if (errAlert) errAlert.style.display = "none";
 
-      document.getElementById('result-section').style.display = "none";
       document.getElementById('skeleton-loader').style.display = "block";
 
       try {
@@ -1502,7 +1515,9 @@ HTML_TEMPLATE = """
         const topPreds = predRes.top_predictions || predRes.top_genres || [];
 
         document.getElementById('skeleton-loader').style.display = "none";
-        document.getElementById('result-section').style.display = "block";
+        document.getElementById('prediction-hero').style.display = "block";
+        document.getElementById('catalog-heading').innerText = "🎯 Similar Films & Recommendations";
+        document.getElementById('catalog-subheading').innerText = "Ranked via hybrid TF-IDF plot similarity, multi-label genre overlap, and Bayesian quality ratings.";
 
         // Render Top 3 Cards
         const top3Wrap = document.getElementById('top3-cards');
@@ -1560,7 +1575,7 @@ HTML_TEMPLATE = """
         // Render recommendations
         applyFilters();
 
-        document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('prediction-hero').scrollIntoView({ behavior: 'smooth' });
 
       } catch (err) {
         document.getElementById('skeleton-loader').style.display = "none";
@@ -1570,6 +1585,24 @@ HTML_TEMPLATE = """
           errBox.style.display = "flex";
           errBox.scrollIntoView({ behavior: 'smooth' });
         }
+      }
+    }
+
+    // Load Initial Catalog on Page Load
+    async function loadInitialCatalog() {
+      try {
+        const resp = await fetch('/api/recommend', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ overview: '', keywords: '', top_n: 12 })
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          allRecommendations = data.recommendations || [];
+          applyFilters();
+        }
+      } catch (e) {
+        console.warn("Initial catalog fetch fallback", e);
       }
     }
 
@@ -1749,7 +1782,7 @@ HTML_TEMPLATE = """
         });
       }
 
-      // Auto-load URL search params if present
+      // Auto-load URL search params or load Featured Catalog immediately
       const params = new URLSearchParams(window.location.search);
       const synopsis = params.get('synopsis');
       const kw = params.get('keywords');
@@ -1759,6 +1792,8 @@ HTML_TEMPLATE = """
         expandTypebar();
         updateWordCount();
         runPrediction();
+      } else {
+        loadInitialCatalog();
       }
     });
   </script>
@@ -1889,19 +1924,22 @@ def api_recommend():
     tokens = clean_and_tokenize(combined)
     vec = vectorize_tokens(tokens, vocab, idf)
 
-    # Predict query genres for Jaccard overlap
-    scores = []
-    for c_idx in range(len(classes)):
-        logit = intercepts[c_idx] + sum(vec.get(f_idx, 0.0) * weights[c_idx][f_idx] for f_idx in vec)
-        prob = 1.0 / (1.0 + math.exp(-max(min(logit, 15.0), -15.0)))
-        scores.append((classes[c_idx], prob))
-    scores.sort(key=lambda x: x[1], reverse=True)
-    query_top_genres = set(g for g, _ in scores[:3])
+    # Predict query genres for Jaccard overlap only if query vector is present
+    if vec:
+        scores = []
+        for c_idx in range(len(classes)):
+            logit = intercepts[c_idx] + sum(vec.get(f_idx, 0.0) * weights[c_idx][f_idx] for f_idx in vec)
+            prob = 1.0 / (1.0 + math.exp(-max(min(logit, 15.0), -15.0)))
+            scores.append((classes[c_idx], prob))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        query_top_genres = set(g for g, _ in scores[:3])
+    else:
+        query_top_genres = set()
 
     results = []
     for m in movies:
         m_vec = m.get("tfidf_vec", {})
-        cosine_sim = sum(vec.get(int(f_idx), 0.0) * val for f_idx, val in m_vec.items())
+        cosine_sim = sum(vec.get(int(f_idx), 0.0) * val for f_idx, val in m_vec.items()) if vec else 0.0
 
         movie_genres = m.get("genres", [])
         if query_top_genres and movie_genres:
@@ -1911,9 +1949,16 @@ def api_recommend():
             jaccard = 0.0
 
         rating = float(m.get("vote_average", 6.0))
-        rating_score = min(max(rating / 10.0, 0.0), 1.0)
+        votes = float(m.get("vote_count", 0))
+        wr = (votes / (votes + 300.0)) * rating + (300.0 / (votes + 300.0)) * 6.1
+        rating_score = min(max(wr / 10.0, 0.0), 1.0)
 
-        hybrid_score = 0.60 * cosine_sim + 0.25 * jaccard + 0.15 * rating_score
+        if vec:
+            hybrid_score = 0.60 * cosine_sim + 0.25 * jaccard + 0.15 * rating_score
+            sim_pct = f"{max(min(cosine_sim * 100, 100), 0):.1f}%"
+        else:
+            hybrid_score = rating_score
+            sim_pct = f"{rating * 10:.0f}%"
 
         results.append({
             "id": m["id"],
