@@ -1,7 +1,6 @@
 """
-Cinemix ▶ - Movie & Anime Genre Classifier & Hybrid Recommender
+Cinemix ▶ - Minimalist Letterboxd-Style Film Genre Classifier & Hybrid Recommender
 Vercel Serverless Function & Full-Stack Web Application.
-Theme: Authentic Letterboxd Cinema Aesthetic (Matte Slate #14181c, Signature Green #00e054, Orange #ff8000, Blue #40bcf4).
 """
 
 import os
@@ -137,32 +136,30 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinemix ▶ | Movie & Anime Genre Classifier & Recommender</title>
+  <title>Cinemix ▶ | Film & Anime Genre Classifier & Recommender</title>
   
   <!-- SEO & Open Graph Metadata -->
-  <meta name="description" content="Cinemix ▶ - Production-ready multi-label NLP movie & anime genre classifier and hybrid recommender in the Letterboxd cinema aesthetic.">
-  <meta property="og:title" content="Cinemix ▶ - Movie & Anime Genre Classifier & Recommender">
-  <meta property="og:description" content="Predict top 3 genres from plot synopses with calibrated probabilities, feature attribution, and hybrid recommendations.">
+  <meta name="description" content="Cinemix ▶ - Minimalist Letterboxd-styled multi-label movie & anime genre classifier and hybrid recommender.">
+  <meta property="og:title" content="Cinemix ▶ - Film Genre Classifier & Recommender">
+  <meta property="og:description" content="Minimalist Letterboxd-styled NLP classifier: predict top 3 genres with calibrated probabilities and match similar films.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Cinemix ▶">
-  <meta name="twitter:description" content="Letterboxd-styled AI Film & Anime Multi-Label Genre Classification & Hybrid Content Recommendations.">
+  <meta name="twitter:description" content="Letterboxd-styled AI Film & Anime Multi-Label Genre Classification & Recommendations.">
   
   <!-- Favicon: Letterboxd Tri-Dot Motif with Play Icon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2314181c'/><circle cx='28' cy='50' r='12' fill='%2300e054'/><circle cx='50' cy='50' r='12' fill='%23ff8000'/><circle cx='72' cy='50' r='12' fill='%2340bcf4'/></svg>">
   
-  <!-- Google Fonts & Chart.js -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
 
   <style>
     /* Letterboxd Dark Theme (Default) */
     :root {
       --lb-green: #00e054;
       --lb-green-hover: #00c030;
-      --lb-green-light: #55f088;
       --lb-green-glow: rgba(0, 224, 84, 0.28);
       --lb-orange: #ff8000;
       --lb-blue: #40bcf4;
@@ -188,7 +185,6 @@ HTML_TEMPLATE = """
     [data-theme="light"] {
       --lb-green: #00b03e;
       --lb-green-hover: #009032;
-      --lb-green-light: #30cf64;
       --lb-green-glow: rgba(0, 176, 62, 0.2);
       --lb-orange: #e06d00;
       --lb-blue: #1c9cd6;
@@ -222,11 +218,11 @@ HTML_TEMPLATE = """
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Top Letterboxd-Style Navbar */
+    /* Minimalist Letterboxd Navbar */
     .navbar {
       background-color: var(--bg-deep);
       border-bottom: 1px solid var(--border);
-      padding: 0.9rem 2rem;
+      padding: 0.95rem 2rem;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -237,7 +233,7 @@ HTML_TEMPLATE = """
     .nav-brand {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 0.75rem;
       text-decoration: none;
     }
     .brand-title-wrap {
@@ -260,31 +256,29 @@ HTML_TEMPLATE = """
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       background-color: var(--lb-green);
       color: #14181c;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 900;
       border-radius: 4px;
       box-shadow: 0 0 10px var(--lb-green-glow);
-      margin-left: 0.15rem;
       line-height: 1;
     }
-    /* Signature Letterboxd Tri-Dot Motif */
     .lb-dots {
       display: inline-flex;
       align-items: center;
       gap: 4px;
       margin-left: 0.35rem;
-      padding: 0.25rem 0.45rem;
+      padding: 0.2rem 0.45rem;
       background: var(--surface);
       border-radius: 12px;
       border: 1px solid var(--border);
     }
     .lb-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
     }
     .dot-green { background-color: var(--lb-green); }
@@ -294,156 +288,167 @@ HTML_TEMPLATE = """
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.65rem;
     }
-    .nav-tag {
-      background: var(--badge-bg);
-      border: 1px solid var(--badge-border);
-      color: var(--lb-green);
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .theme-toggle-btn {
+    .nav-btn {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-muted);
       border-radius: 4px;
-      padding: 0.4rem 0.8rem;
+      padding: 0.42rem 0.85rem;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.84rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       gap: 0.45rem;
       transition: all 0.2s ease;
+      text-decoration: none;
     }
-    .theme-toggle-btn:hover {
+    .nav-btn:hover {
       border-color: var(--lb-green);
       color: var(--text);
     }
 
     /* Container */
     .container {
-      max-width: 1180px;
+      max-width: 1080px;
       width: 100%;
       margin: 0 auto;
-      padding: 2.25rem 1.25rem 4rem 1.25rem;
+      padding: 2.75rem 1.25rem 4rem 1.25rem;
       flex: 1;
     }
 
-    /* Hero Banner */
-    .hero {
-      margin-bottom: 2rem;
+    /* Minimal Hero */
+    .minimal-hero {
+      text-align: center;
+      margin-bottom: 2.25rem;
     }
-    .hero-eyebrow {
-      color: var(--lb-green);
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-    .hero-title {
-      font-size: 2.35rem;
+    .hero-brand {
+      font-size: 3rem;
       font-weight: 900;
       color: var(--text);
       letter-spacing: -0.03em;
-      line-height: 1.2;
-    }
-    .hero-desc {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      margin-top: 0.5rem;
-      max-width: 760px;
-    }
-
-    /* Letterboxd Tabs Bar */
-    .tab-bar {
-      display: flex;
-      gap: 0.5rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 2rem;
-      overflow-x: auto;
-    }
-    .tab-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
-      padding: 0.9rem 1.5rem;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -1px;
-      transition: all 0.2s ease;
+      font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap;
+      gap: 0.6rem;
     }
-    .tab-btn:hover { color: var(--text); }
-    .tab-btn.active {
-      color: var(--lb-green);
-      border-bottom-color: var(--lb-green);
-    }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    /* Letterboxd Card Surfaces */
-    .cr-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1.75rem;
-      margin-bottom: 1.75rem;
-      box-shadow: 0 4px 18px var(--shadow-color);
-      transition: all 0.2s ease;
-    }
-
-    .form-group { margin-bottom: 1.25rem; }
-    label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-    }
-    textarea, select, input {
-      width: 100%;
-      background-color: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.9rem 1.1rem;
-      color: var(--text);
-      font-family: inherit;
+    .hero-brand .play-icon-badge {
+      width: 32px;
+      height: 32px;
       font-size: 0.95rem;
-      transition: all 0.2s ease;
     }
-    textarea:focus, select:focus, input:focus {
-      outline: none;
-      border-color: var(--lb-green);
-      box-shadow: 0 0 0 2px var(--lb-green-glow);
+    .hero-sub {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-top: 0.4rem;
+      font-weight: 500;
     }
 
-    /* Word Counter & Validation Alert */
+    /* EXPANDABLE HOVER TYPEBAR */
+    .expandable-search-wrapper {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.9rem 1.25rem;
+      max-width: 860px;
+      margin: 0 auto 2.5rem auto;
+      box-shadow: 0 4px 20px var(--shadow-color);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .expandable-search-wrapper:hover,
+    .expandable-search-wrapper:focus-within,
+    .expandable-search-wrapper.is-expanded {
+      border-color: var(--lb-green);
+      box-shadow: 0 0 28px var(--lb-green-glow), 0 8px 32px rgba(0,0,0,0.45);
+      transform: translateY(-2px);
+    }
+
+    .search-top-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+    }
+    .search-lens-icon {
+      font-size: 1.35rem;
+      color: var(--lb-green);
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+    .expandable-textarea {
+      flex: 1;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      color: var(--text) !important;
+      font-family: inherit;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      resize: none;
+      min-height: 40px;
+      padding: 0.2rem 0;
+      transition: min-height 0.3s ease;
+    }
+    .expandable-textarea:focus {
+      outline: none !important;
+    }
+    /* Expands on hover or focus */
+    .expandable-search-wrapper:hover .expandable-textarea,
+    .expandable-search-wrapper:focus-within .expandable-textarea,
+    .expandable-search-wrapper.is-expanded .expandable-textarea {
+      min-height: 110px;
+    }
+
+    .quick-submit-btn {
+      background: var(--lb-green);
+      color: #14181c;
+      border: none;
+      border-radius: 4px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px var(--lb-green-glow);
+    }
+    .quick-submit-btn:hover {
+      background: var(--lb-green-hover);
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    /* Expanded Tray */
+    .search-expanded-tray {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin-top 0.3s ease;
+      margin-top: 0;
+    }
+    .expandable-search-wrapper:hover .search-expanded-tray,
+    .expandable-search-wrapper:focus-within .search-expanded-tray,
+    .expandable-search-wrapper.is-expanded .search-expanded-tray {
+      max-height: 380px;
+      opacity: 1;
+      margin-top: 0.85rem;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 0.85rem;
+    }
+
     .counter-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 0.45rem;
-      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 700;
       color: var(--text-dim);
     }
@@ -458,48 +463,62 @@ HTML_TEMPLATE = """
     .counter-valid { color: var(--lb-green); }
     .counter-invalid { color: #f87171; }
 
+    .search-secondary-row {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+    @media (max-width: 680px) { .search-secondary-row { grid-template-columns: 1fr; } }
+
+    .search-secondary-row input, .search-secondary-row select {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+    .search-secondary-row input:focus, .search-secondary-row select:focus {
+      outline: none;
+      border-color: var(--lb-green);
+    }
+
     .validation-alert {
       display: none;
       background: rgba(239, 68, 68, 0.12);
       border: 1px solid #ef4444;
       color: #f87171;
       border-radius: 4px;
-      padding: 0.8rem 1rem;
-      font-size: 0.88rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.75rem;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 3fr 2fr;
-      gap: 1.25rem;
-    }
-    @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
-
-    /* Button Toolbar */
     .button-toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1.25rem;
+      gap: 0.65rem;
     }
-    /* Letterboxd Signature Green Button */
     .cr-btn {
       background: var(--lb-green);
       color: #14181c;
       font-weight: 900;
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       border: none;
       border-radius: 4px;
-      padding: 0.85rem 1.6rem;
+      padding: 0.75rem 1.4rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
       transition: all 0.2s ease;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -509,20 +528,19 @@ HTML_TEMPLATE = """
       background: var(--lb-green-hover);
       color: #ffffff;
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px var(--lb-green-glow);
     }
     .cr-btn-secondary {
       background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text-muted);
       font-weight: 800;
-      font-size: 0.86rem;
+      font-size: 0.82rem;
       border-radius: 4px;
-      padding: 0.85rem 1.25rem;
+      padding: 0.75rem 1.1rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       transition: all 0.2s ease;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -530,34 +548,6 @@ HTML_TEMPLATE = """
     .cr-btn-secondary:hover {
       border-color: var(--lb-green);
       color: var(--text);
-    }
-
-    /* Empty State */
-    .empty-state-box {
-      border: 2px dashed var(--border);
-      border-radius: 6px;
-      padding: 3.5rem 1.5rem;
-      text-align: center;
-      color: var(--text-muted);
-      margin-top: 1.5rem;
-      background: var(--card-bg);
-    }
-    .empty-state-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.85;
-    }
-    .empty-state-title {
-      font-size: 1.3rem;
-      font-weight: 900;
-      color: var(--text);
-      margin-bottom: 0.4rem;
-    }
-    .empty-state-sub {
-      font-size: 0.95rem;
-      max-width: 520px;
-      margin: 0 auto;
-      color: var(--text-muted);
     }
 
     /* Skeleton Loading State */
@@ -578,14 +568,14 @@ HTML_TEMPLATE = """
       100% { background-position: 200% 0; }
     }
 
-    /* Letterboxd Prediction Banner & Top 3 Badges */
+    /* Prediction Banner & Top 3 Badges */
     .prediction-hero {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-left: 5px solid var(--lb-green);
       border-radius: 6px;
-      padding: 1.75rem;
-      margin-bottom: 1.75rem;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
       box-shadow: 0 4px 20px var(--shadow-color);
     }
     .top3-genres-row {
@@ -633,8 +623,8 @@ HTML_TEMPLATE = """
       border: 1px solid var(--lb-orange);
       color: #ffaa44;
       border-radius: 4px;
-      padding: 0.9rem 1.2rem;
-      font-size: 0.92rem;
+      padding: 0.85rem 1.1rem;
+      font-size: 0.9rem;
       font-weight: 600;
       margin-bottom: 1.5rem;
       align-items: center;
@@ -666,7 +656,7 @@ HTML_TEMPLATE = """
       margin-top: 1.5rem;
     }
     .why-title {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -753,10 +743,30 @@ HTML_TEMPLATE = """
     }
     @media (max-width: 860px) { .filter-bar { grid-template-columns: 1fr; } }
 
+    .filter-bar label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .filter-bar select, .filter-bar input {
+      width: 100%;
+      background-color: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.65rem 0.85rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
     /* Letterboxd Poster Grid Style */
     .rec-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1.35rem;
       margin-top: 1rem;
     }
@@ -809,7 +819,7 @@ HTML_TEMPLATE = """
       color: var(--lb-green);
       padding: 0.2rem 0.55rem;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -904,120 +914,6 @@ HTML_TEMPLATE = """
       border-color: var(--lb-green);
     }
 
-    /* KPI Cards */
-    .kpi-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
-    .kpi-box {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-top: 3px solid var(--lb-green);
-      border-radius: 4px;
-      padding: 1.35rem;
-      text-align: center;
-      box-shadow: 0 4px 14px var(--shadow-color);
-    }
-    .kpi-num {
-      font-size: 2.2rem;
-      font-weight: 900;
-      color: var(--lb-green);
-      line-height: 1.1;
-      margin-bottom: 0.35rem;
-    }
-    .kpi-desc {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      font-weight: 800;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-    }
-
-    /* Charts Grid */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    @media (max-width: 600px) { .charts-grid { grid-template-columns: 1fr; } }
-
-    .chart-container {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 14px var(--shadow-color);
-    }
-    .chart-header {
-      font-size: 0.95rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Predictive Words Pills */
-    .words-genre-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-      margin-bottom: 1.25rem;
-    }
-    .pill-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 4px;
-      padding: 0.35rem 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .pill-btn:hover { color: var(--text); border-color: var(--lb-green); }
-    .pill-btn.active {
-      background: var(--lb-green);
-      color: #14181c;
-      border-color: var(--lb-green);
-    }
-
-    /* Accordion */
-    .accordion-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
-      overflow: hidden;
-    }
-    .accordion-header {
-      padding: 1.1rem 1.35rem;
-      font-weight: 800;
-      font-size: 0.95rem;
-      color: var(--text);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-    }
-    .accordion-body {
-      padding: 0 1.35rem 1.25rem 1.35rem;
-      color: var(--text-muted);
-      font-size: 0.92rem;
-      display: none;
-      line-height: 1.6;
-    }
-    .accordion-body.open { display: block; }
-
     /* Footer */
     footer {
       background-color: var(--bg-deep);
@@ -1032,7 +928,7 @@ HTML_TEMPLATE = """
 </head>
 <body data-theme="dark">
 
-  <!-- Navbar -->
+  <!-- Minimalist Navbar -->
   <nav class="navbar">
     <a href="/" class="nav-brand">
       <div class="brand-title-wrap">
@@ -1046,70 +942,66 @@ HTML_TEMPLATE = """
       </div>
     </a>
     <div class="nav-actions">
-      <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Toggle Dark and Light Mode">
+      <!-- Dark / Light Theme Button -->
+      <button class="nav-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Toggle Theme">
         <span id="theme-icon">🌙</span> <span id="theme-label">Dark</span>
       </button>
-      <span class="nav-tag">FILM NLP</span>
+      <!-- About Section Button right next to theme -->
+      <button class="nav-btn" onclick="openAboutModal()" id="about-btn" aria-label="About Cinemix">
+        <span>ℹ️</span> <span>About</span>
+      </button>
     </div>
   </nav>
 
-  <!-- Container -->
+  <!-- Main Container -->
   <main class="container">
-    <header class="hero">
-      <div class="hero-eyebrow">
-        <span>●</span> Film & Anime Intelligence Pipeline
+    <!-- Minimal Header (site name only) -->
+    <header class="minimal-hero">
+      <div class="hero-brand">
+        <span>CINEMIX</span>
+        <span class="play-icon-badge">▶</span>
       </div>
-      <h1 class="hero-title">Predict Genres & Discover Cinema</h1>
-      <p class="hero-desc">Powered by sublinear TF-IDF, One-vs-Rest Balanced Logistic Regression across 4,680+ titles, calibrated multi-label probabilities, and Letterboxd-style hybrid recommendations.</p>
     </header>
 
-    <!-- Navigation Tabs -->
-    <div class="tab-bar" role="tablist">
-      <button class="tab-btn active" role="tab" onclick="switchTab('predict')" id="tab-btn-predict">
-        🎬 Predict & Recommend
-      </button>
-      <button class="tab-btn" role="tab" onclick="switchTab('analytics')" id="tab-btn-analytics">
-        📊 Dataset Analytics
-      </button>
-      <button class="tab-btn" role="tab" onclick="switchTab('about')" id="tab-btn-about">
-        💡 How It Works
-      </button>
-    </div>
+    <!-- EXPANDABLE TYPEBAR ON HOVER / FOCUS -->
+    <div class="expandable-search-wrapper" id="search-box">
+      <!-- Search top bar -->
+      <div class="search-top-bar">
+        <span class="search-lens-icon">🎬</span>
+        <textarea id="plot" 
+                  class="expandable-textarea" 
+                  placeholder="Type or paste a movie storyline, plot, or scene to classify genres & match films (min. 15 words)..." 
+                  rows="1" 
+                  oninput="updateWordCount()"
+                  onfocus="expandTypebar()"></textarea>
+        <button class="quick-submit-btn" onclick="runPrediction()" title="Classify & Discover">
+          <span>▶</span>
+        </button>
+      </div>
 
-    <!-- TAB 1: PREDICTOR & RECOMMENDER -->
-    <section id="tab-predict" class="tab-content active" role="tabpanel">
-      <div class="cr-card">
-        <!-- Preset Selector -->
-        <div class="form-group">
-          <label for="presets">⚡ Quick Archetype Presets (Auto-fill Synopsis):</label>
-          <select id="presets" onchange="applyPreset()">
-            <option value="">-- Choose a cinema or anime storyline --</option>
-            <option value="scifi">Interstellar (Sci-Fi • Wormhole, Relativistic Black Hole & Tesseract)</option>
-            <option value="action">The Dark Knight (Action • Gotham Vigilante vs Joker Chaos)</option>
-            <option value="shonen">Demon Slayer Anime (Action & Fantasy • Demon Slaying Blade Corps)</option>
-            <option value="horror">The Conjuring (Horror • Paranormal Investigators & Secluded Possession)</option>
-            <option value="comedy">Superbad (Comedy • High School Graduation Party & Fake ID)</option>
-            <option value="cyberpunk">Ghost in the Shell Anime (Sci-Fi & Crime • Cyborg Operative & Puppet Master)</option>
-            <option value="romance">La La Land (Romance & Drama • Jazz Musician & Aspiring Actress)</option>
-            <option value="animation">Spirited Away Anime (Animation & Fantasy • Spirit Bathhouse & Witch Curse)</option>
-          </select>
+      <!-- Expanded Tray (Revealed on hover or focus) -->
+      <div class="search-expanded-tray">
+        <div class="counter-row">
+          <span id="word-badge" class="counter-badge counter-invalid">0 / 15 words minimum</span>
+          <span id="char-badge">0 characters</span>
         </div>
 
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="plot">Narrative Synopsis / Story Overview:</label>
-            <textarea id="plot" rows="5" placeholder="Enter storyline synopsis here (minimum 15 words)..." oninput="updateWordCount()"></textarea>
-            <div class="counter-row">
-              <span id="word-badge" class="counter-badge counter-invalid">0 / 15 words minimum</span>
-              <span id="char-badge">0 characters</span>
-            </div>
+        <div class="search-secondary-row">
+          <div>
+            <input type="text" id="keywords" placeholder="Thematic keywords / tags (e.g. space travel, cyberpunk, noir, demons)...">
           </div>
-          <div class="form-group">
-            <label for="keywords">Thematic Keywords / Tags (Optional):</label>
-            <textarea id="keywords" rows="5" placeholder="e.g. superhero, gotham, vigilante, crime fighter, space travel, demon..."></textarea>
-            <div class="counter-row">
-              <span>Keywords provide contextual weight</span>
-            </div>
+          <div>
+            <select id="presets" onchange="applyPreset()">
+              <option value="">⚡ Quick Archetype Presets...</option>
+              <option value="scifi">Interstellar (Sci-Fi • Wormhole & Tesseract)</option>
+              <option value="action">The Dark Knight (Action • Gotham Vigilante)</option>
+              <option value="shonen">Demon Slayer (Anime • Demon Slaying Blade)</option>
+              <option value="horror">The Conjuring (Horror • Farmhouse Possession)</option>
+              <option value="comedy">Superbad (Comedy • High School Wild Party)</option>
+              <option value="cyberpunk">Ghost in the Shell (Anime • Cyborg Hacker)</option>
+              <option value="romance">La La Land (Romance • Jazz & Dreams)</option>
+              <option value="animation">Spirited Away (Anime • Spirit Bathhouse)</option>
+            </select>
           </div>
         </div>
 
@@ -1134,246 +1026,107 @@ HTML_TEMPLATE = """
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- Empty State -->
-      <div id="empty-state" class="empty-state-box">
-        <div class="empty-state-icon">🎬</div>
-        <h3 class="empty-state-title">Enter a Synopsis to Begin</h3>
-        <p class="empty-state-sub">Type a movie or anime storyline or select a preset above. Cinemix ▶ will classify the top 3 genres, inspect predictive keywords, and surface similar films from the catalog.</p>
+    <!-- Skeleton Shimmer Loader -->
+    <div id="skeleton-loader" class="skeleton-box">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card" style="height: 180px;"></div>
+    </div>
+
+    <!-- Output Section -->
+    <section id="result-section" style="display: none;">
+      <!-- Low Confidence Alert -->
+      <div id="low-conf-alert" class="low-confidence-alert">
+        <span>⚠️</span> <span id="low-conf-text"></span>
       </div>
 
-      <!-- Skeleton Shimmer Loader -->
-      <div id="skeleton-loader" class="skeleton-box">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card" style="height: 180px;"></div>
-      </div>
-
-      <!-- Output Section -->
-      <div id="result-section" style="display: none;">
-        <!-- Low Confidence Alert -->
-        <div id="low-conf-alert" class="low-confidence-alert">
-          <span>⚠️</span> <span id="low-conf-text"></span>
-        </div>
-
-        <!-- Top 3 Genre Prediction Card -->
-        <div class="prediction-hero">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-              <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.08em;">
-                Multi-Label Genre Classification Result
-              </div>
-              <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--text); margin-top: 0.2rem;">
-                Top Predicted Genres
-              </h2>
-            </div>
-            <button class="cr-btn-secondary" style="padding: 0.4rem 0.85rem;" onclick="copyResultText()">
-              <span>📋</span> <span id="copy-btn-text">Copy Result</span>
-            </button>
-          </div>
-
-          <!-- Top 3 Genre Badges -->
-          <div class="top3-genres-row" id="top3-cards"></div>
-
-          <!-- Explainability: Why this prediction? -->
-          <div class="why-section" id="why-box">
-            <div class="why-title">
-              <span>🔍</span> Why this prediction? (Top influential narrative signals)
-            </div>
-            <div class="word-chips-grid" id="influential-words"></div>
-          </div>
-
-          <!-- Feedback Bar -->
-          <div class="feedback-row">
-            <span>Was this classification accurate?</span>
-            <div class="feedback-btns">
-              <button class="fb-btn" id="fb-up" onclick="sendFeedback('up')">👍 Accurate</button>
-              <button class="fb-btn" id="fb-down" onclick="sendFeedback('down')">👎 Inaccurate</button>
-            </div>
-          </div>
-          <div id="fb-status" style="font-size: 0.8rem; color: var(--lb-green); font-weight: 800; margin-top: 0.5rem; display: none;">
-            ✓ Feedback logged. Thank you for calibrating Cinemix ▶!
-          </div>
-        </div>
-
-        <!-- Recommendations Header & Filters -->
-        <div style="margin-top: 2.5rem; margin-bottom: 1rem;">
-          <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--text);">Similar Films & Recommendations</h2>
-          <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.25rem;">
-            Letterboxd-style hybrid scoring combining TF-IDF Cosine Similarity (60%), Multi-label Genre Jaccard Overlap (25%), and Quality Ratings (15%).
-          </p>
-        </div>
-
-        <!-- Filter Controls -->
-        <div class="filter-bar">
+      <!-- Top 3 Genre Prediction Card -->
+      <div class="prediction-hero">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div>
-            <label for="filter-genre">Filter by Genre:</label>
-            <select id="filter-genre" onchange="applyFilters()">
-              <option value="All">All Genres (Catalog)</option>
-              <option value="Action">Action</option>
-              <option value="Adventure">Adventure</option>
-              <option value="Animation">Animation</option>
-              <option value="Comedy">Comedy</option>
-              <option value="Crime">Crime</option>
-              <option value="Drama">Drama</option>
-              <option value="Family">Family</option>
-              <option value="Fantasy">Fantasy</option>
-              <option value="Horror">Horror</option>
-              <option value="Romance">Romance</option>
-              <option value="Science Fiction">Science Fiction</option>
-              <option value="Thriller">Thriller</option>
-            </select>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.08em;">
+              Multi-Label Genre Classification Result
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--text); margin-top: 0.2rem;">
+              Top Predicted Genres
+            </h2>
           </div>
-          <div>
-            <label for="filter-year">Release Year Range:</label>
-            <select id="filter-year" onchange="applyFilters()">
-              <option value="all">All Release Years</option>
-              <option value="2010s">2010 – Present</option>
-              <option value="2000s">2000 – 2009</option>
-              <option value="1990s">1990 – 1999</option>
-              <option value="classic">Classic (Pre-1990)</option>
-            </select>
-          </div>
-          <div>
-            <label for="filter-rating">Min Rating: <span id="rating-val" style="color: var(--lb-green); font-weight: 900;">6.0</span> ★</label>
-            <input type="range" id="filter-rating" min="0" max="9" step="0.5" value="6.0" oninput="document.getElementById('rating-val').innerText = this.value; applyFilters();">
-          </div>
+          <button class="cr-btn-secondary" style="padding: 0.4rem 0.85rem;" onclick="copyResultText()">
+            <span>📋</span> <span id="copy-btn-text">Copy Result</span>
+          </button>
         </div>
 
-        <!-- Recommendations Grid -->
-        <div class="rec-grid" id="rec-list"></div>
-      </div>
-    </section>
+        <!-- Top 3 Genre Badges -->
+        <div class="top3-genres-row" id="top3-cards"></div>
 
-    <!-- TAB 2: DATASET & MODEL ANALYTICS -->
-    <section id="tab-analytics" class="tab-content" role="tabpanel">
-      <!-- KPI Top Metrics -->
-      <div class="kpi-row">
-        <div class="kpi-box">
-          <div class="kpi-num" id="kpi-hamming">86.7%</div>
-          <div class="kpi-desc">Hamming Accuracy</div>
+        <!-- Explainability: Why this prediction? -->
+        <div class="why-section" id="why-box">
+          <div class="why-title">
+            <span>🔍</span> Why this prediction? (Top influential narrative signals)
+          </div>
+          <div class="word-chips-grid" id="influential-words"></div>
         </div>
-        <div class="kpi-box">
-          <div class="kpi-num" id="kpi-microf1">67.7%</div>
-          <div class="kpi-desc">Micro F1-Score</div>
+
+        <!-- Feedback Bar -->
+        <div class="feedback-row">
+          <span>Was this classification accurate?</span>
+          <div class="feedback-btns">
+            <button class="fb-btn" id="fb-up" onclick="sendFeedback('up')">👍 Accurate</button>
+            <button class="fb-btn" id="fb-down" onclick="sendFeedback('down')">👎 Inaccurate</button>
+          </div>
         </div>
-        <div class="kpi-box">
-          <div class="kpi-num" id="kpi-hitrate">96.8%</div>
-          <div class="kpi-desc">Top-3 Any Hit Rate</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-num" id="kpi-catalog">4,680</div>
-          <div class="kpi-desc">Catalog Titles (12 Genres)</div>
+        <div id="fb-status" style="font-size: 0.8rem; color: var(--lb-green); font-weight: 800; margin-top: 0.5rem; display: none;">
+          ✓ Feedback logged. Thank you for calibrating Cinemix ▶!
         </div>
       </div>
 
-      <!-- Charts Grid -->
-      <div class="charts-grid">
-        <div class="chart-container">
-          <div class="chart-header">
-            <span>📊 Genre Distribution Across Catalog</span>
-          </div>
-          <canvas id="chart-distribution" height="280"></canvas>
-        </div>
-        <div class="chart-container">
-          <div class="chart-header">
-            <span>🎯 Per-Genre F1, Precision & Recall</span>
-          </div>
-          <canvas id="chart-metrics" height="280"></canvas>
-        </div>
-      </div>
-
-      <div class="charts-grid">
-        <div class="chart-container">
-          <div class="chart-header">
-            <span>⚖️ 5-Fold Cross Validation Benchmark</span>
-          </div>
-          <canvas id="chart-benchmark" height="260"></canvas>
-        </div>
-        <div class="chart-container">
-          <div class="chart-header">
-            <span>🔥 Genre Co-Occurrence Matrix</span>
-          </div>
-          <div id="co-matrix-wrap" style="overflow-x: auto; max-height: 280px;"></div>
-        </div>
-      </div>
-
-      <!-- Top Predictive Words by Genre -->
-      <div class="cr-card">
-        <div class="chart-header">
-          <span>🔤 Top Predictive Words per Genre (Regression Coefficients)</span>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
-          Click any genre below to inspect the highest-weighted vocabulary terms learned by the model.
-        </p>
-        <div class="words-genre-pills" id="genre-pills"></div>
-        <div class="word-chips-grid" id="genre-words-display"></div>
-      </div>
-
-      <!-- Dataset Size and Limitations Note -->
-      <div class="cr-card">
-        <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 0.6rem;">
-          Dataset Scale & Methodological Notes
-        </h3>
-        <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
-          • <strong>Training Corpus:</strong> 4,680 clean titles from TMDB 5000 and curated anime classics. Synopses are augmented with user keywords and stripped of low-information tokens.<br>
-          • <strong>Multi-Label Modeling:</strong> Films and anime naturally span multiple genres (e.g. Action + Sci-Fi + Adventure). The One-vs-Rest architecture optimizes individual sigmoid decision boundaries for each of the 12 primary genres.<br>
-          • <strong>Input Length Limitation:</strong> Text samples with fewer than 15 words suffer from sparse vocabulary representation. Providing rich narrative descriptions yields significantly higher confidence and fidelity.<br>
-          • <strong>Calibrated Probabilities:</strong> Probabilities reflect normalized sigmoid activation values $P(C|x) = \sigma(w^T x + b)$ rather than Naive Bayes uncalibrated likelihood ratios.
+      <!-- Recommendations Header & Filters -->
+      <div style="margin-top: 2.5rem; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.6rem; font-weight: 900; color: var(--text);">Similar Films & Recommendations</h2>
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Hybrid scoring combining TF-IDF Cosine Similarity (60%), Multi-label Genre Jaccard Overlap (25%), and Quality Ratings (15%).
         </p>
       </div>
-    </section>
 
-    <!-- TAB 3: HOW IT WORKS (ABOUT) -->
-    <section id="tab-about" class="tab-content" role="tabpanel">
-      <div class="cr-card">
-        <h2 style="font-size: 1.5rem; font-weight: 900; color: var(--text); margin-bottom: 1rem;">
-          System Architecture & Methodological Blueprint
-        </h2>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">
-            <span>1. Text Preprocessing & Snowball Stemming</span>
-            <span>▾</span>
-          </div>
-          <div class="accordion-body">
-            Input storylines undergo normalization: lowercase transformation, punctuation stripping, stop word filtering, and Snowball morphological lemmatization. An irregular noun lookup handles semantic cinema roots (e.g., <em>superheroes → superhero, murderers → murder</em>).
-          </div>
+      <!-- Filter Controls -->
+      <div class="filter-bar">
+        <div>
+          <label for="filter-genre">Filter by Genre:</label>
+          <select id="filter-genre" onchange="applyFilters()">
+            <option value="All">All Genres (Catalog)</option>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Animation">Animation</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Crime">Crime</option>
+            <option value="Drama">Drama</option>
+            <option value="Family">Family</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Horror">Horror</option>
+            <option value="Romance">Romance</option>
+            <option value="Science Fiction">Science Fiction</option>
+            <option value="Thriller">Thriller</option>
+          </select>
         </div>
-
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">
-            <span>2. Sublinear TF-IDF Feature Representation (6,000 Unigrams & Bigrams)</span>
-            <span>▾</span>
-          </div>
-          <div class="accordion-body">
-            The corpus is vectorized using term frequency-inverse document frequency with sublinear scaling:
-            <br><code>tf = 1 + ln(count)</code>, combined with <code>idf = ln((1 + N)/(1 + df)) + 1</code>.
-            Extracting both single words (unigrams) and 2-word phrases (bigrams) preserves contextual expressions like <em>"space travel"</em>, <em>"serial killer"</em>, and <em>"high school"</em>.
-          </div>
+        <div>
+          <label for="filter-year">Release Year Range:</label>
+          <select id="filter-year" onchange="applyFilters()">
+            <option value="all">All Release Years</option>
+            <option value="2010s">2010 – Present</option>
+            <option value="2000s">2000 – 2009</option>
+            <option value="1990s">1990 – 1999</option>
+            <option value="classic">Classic (Pre-1990)</option>
+          </select>
         </div>
-
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">
-            <span>3. Multi-Label OneVsRest Logistic Regression</span>
-            <span>▾</span>
-          </div>
-          <div class="accordion-body">
-            Single-label Naive Bayes fails to represent modern media because most films have multiple genres. Cinemix ▶ employs 12 balanced One-vs-Rest binary classifiers. Predictions are computed using sigmoid activations, producing an independent probability for each genre and outputting the top 3 scores.
-          </div>
-        </div>
-
-        <div class="accordion-item">
-          <div class="accordion-header" onclick="toggleAccordion(this)">
-            <span>4. Hybrid Content-Based Recommendation Formula</span>
-            <span>▾</span>
-          </div>
-          <div class="accordion-body">
-            Similar movies are retrieved via a 3-tier hybrid objective score:
-            <br><strong>Hybrid Score = 0.60 × Cosine Similarity + 0.25 × Genre Jaccard Overlap + 0.15 × Normalized Rating</strong>
-            This ensures that recommendations share narrative themes, genre profile, and high critical acclaim.
-          </div>
+        <div>
+          <label for="filter-rating">Min Rating: <span id="rating-val" style="color: var(--lb-green); font-weight: 900;">6.0</span> ★</label>
+          <input type="range" id="filter-rating" min="0" max="9" step="0.5" value="6.0" oninput="document.getElementById('rating-val').innerText = this.value; applyFilters();">
         </div>
       </div>
+
+      <!-- Recommendations Grid -->
+      <div class="rec-grid" id="rec-list"></div>
     </section>
   </main>
 
@@ -1415,12 +1168,71 @@ HTML_TEMPLATE = """
     </div>
   </div>
 
+  <!-- ABOUT MODAL (Explaining Cinemix & How It Works) -->
+  <div id="about-modal" class="modal-backdrop" onclick="closeAboutModalOnBackdrop(event)">
+    <div class="modal-box" style="max-width: 720px;">
+      <button class="modal-close-btn" onclick="closeAboutModal()" aria-label="Close modal">✕</button>
+      
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+        <h2 style="font-size: 1.8rem; font-weight: 900; color: var(--text); font-family: 'Space Grotesk', sans-serif;">CINEMIX</h2>
+        <span class="play-icon-badge">▶</span>
+        <div class="lb-dots" style="margin-left: 0.4rem;">
+          <span class="lb-dot dot-green"></span>
+          <span class="lb-dot dot-orange"></span>
+          <span class="lb-dot dot-blue"></span>
+        </div>
+      </div>
+      <p style="color: var(--lb-green); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.25rem;">
+        Letterboxd-Styled Film & Anime Multi-Label Intelligence
+      </p>
+
+      <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; margin-bottom: 1.5rem;">
+        <strong>Cinemix ▶</strong> is a specialized cinema discovery and NLP classification tool for cinephiles, screenwriters, and film fans. By analyzing narrative synopses, storyline summaries, or pitch descriptions, Cinemix predicts a film's true <strong>multi-label genre DNA</strong> and retrieves the most organically similar films across a rich catalog of 4,680+ cinema and anime titles.
+      </div>
+
+      <div style="border-top: 1px solid var(--border); padding-top: 1.25rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 900; color: var(--text); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.85rem;">
+          💡 How It Works (Pipeline Architecture)
+        </h3>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
+          <div style="background: var(--surface); padding: 0.9rem 1.1rem; border-radius: 4px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">1. Morphological Normalization & Lemmatization</strong>
+            Input storylines undergo case folding, punctuation cleaning, stopword removal, and <strong>Snowball morphological stemming</strong> paired with an irregular noun lookup dictionary (e.g. <em>superheroes → superhero, murderers → murder, detectives → detect</em>).
+          </div>
+
+          <div style="background: var(--surface); padding: 0.9rem 1.1rem; border-radius: 4px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">2. Sublinear TF-IDF Feature Space (6,000 N-Grams)</strong>
+            The text is vectorized using unigrams and bigrams with sublinear term frequency scaling ($tf = 1 + \ln(count)$) to detect contextual narrative expressions like <em>"space travel"</em>, <em>"serial killer"</em>, and <em>"high school"</em>.
+          </div>
+
+          <div style="background: var(--surface); padding: 0.9rem 1.1rem; border-radius: 4px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">3. Multi-Label One-vs-Rest Logistic Regression</strong>
+            Films naturally cross multiple genres. Cinemix uses 12 balanced binary classifiers to compute calibrated continuous sigmoid probabilities $P(C|x) = \frac{1}{1 + e^{-(w_c^T x + b_c)}}$ and outputs the top 3 genres with confidence percentages.
+          </div>
+
+          <div style="background: var(--surface); padding: 0.9rem 1.1rem; border-radius: 4px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">4. 3-Tier Hybrid Recommendation Formula</strong>
+            Similar titles are ranked via an objective hybrid function:
+            <br>
+            <code style="color: var(--lb-green); font-weight: 800; font-size: 0.88rem;">Score = 0.60 × Cosine Similarity + 0.25 × Genre Jaccard Overlap + 0.15 × Normalized Rating</code>
+          </div>
+
+          <div style="background: var(--surface); padding: 0.9rem 1.1rem; border-radius: 4px; border: 1px solid var(--border);">
+            <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">5. Verified Accuracy Benchmarks</strong>
+            Trained on 4,680+ titles from TMDB 5000 and curated anime classics. Evaluated using 5-fold cross-validation with <strong>86.7% Hamming Accuracy</strong>, <strong>67.7% Micro F1</strong>, and a <strong>96.8% Top-3 Any Hit Rate</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div style="margin-bottom: 0.4rem; font-weight: 900; color: var(--text); letter-spacing: 0.04em;">
       CINEMIX <span style="color: var(--lb-green);">▶</span>
     </div>
-    Multi-Label NLP Machine Learning Pipeline & Film Intelligence in the Letterboxd aesthetic.
+    Minimalist Letterboxd-styled Film & Anime Multi-Label Intelligence.
   </footer>
 
   <script>
@@ -1455,15 +1267,18 @@ HTML_TEMPLATE = """
         keywords: "jazz musician, aspiring actress, los angeles romance, musical love story, bittersweet dreams"
       },
       animation: {
-        plot: "While exploring an abandoned amusement park, a young girl discovers a mystical world of ancient spirits and Japanese gods. When her parents are magically transformed into pigs by a vengeful witch, she must work at a grand spirit bathhouse to free them.",
+        plot: "While exploring an abandoned amusement park, a young girl discovers a mystical world of ancient spirits and Japanese gods. When parents are magically transformed into pigs by a vengeful witch, she must work at a grand spirit bathhouse to free them.",
         keywords: "anime, studio ghibli, spirit world, witch, bathhouse, fantasy curse, coming of age"
       }
     };
 
-    // Stored recommendations cache for live filtering
     let allRecommendations = [];
     let currentPrediction = null;
-    let analyticsData = null;
+
+    // Typebar expansion
+    function expandTypebar() {
+      document.getElementById('search-box').classList.add('is-expanded');
+    }
 
     // Word Counter
     function updateWordCount() {
@@ -1481,6 +1296,10 @@ HTML_TEMPLATE = """
         badge.className = "counter-badge counter-invalid";
       }
       document.getElementById('char-badge').innerText = `${charCount} characters`;
+      
+      if (text.length > 0) {
+        expandTypebar();
+      }
     }
 
     function applyPreset() {
@@ -1488,6 +1307,7 @@ HTML_TEMPLATE = """
       if (presets[val]) {
         document.getElementById('plot').value = presets[val].plot;
         document.getElementById('keywords').value = presets[val].keywords;
+        expandTypebar();
         updateWordCount();
       }
     }
@@ -1506,23 +1326,7 @@ HTML_TEMPLATE = """
       document.getElementById('presets').value = "";
       updateWordCount();
       document.getElementById('result-section').style.display = "none";
-      document.getElementById('empty-state').style.display = "block";
-    }
-
-    function switchTab(name) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      if (name === 'predict') {
-        document.getElementById('tab-btn-predict').classList.add('active');
-        document.getElementById('tab-predict').classList.add('active');
-      } else if (name === 'analytics') {
-        document.getElementById('tab-btn-analytics').classList.add('active');
-        document.getElementById('tab-analytics').classList.add('active');
-        loadAnalytics();
-      } else if (name === 'about') {
-        document.getElementById('tab-btn-about').classList.add('active');
-        document.getElementById('tab-about').classList.add('active');
-      }
+      document.getElementById('search-box').classList.remove('is-expanded');
     }
 
     // Theme Toggle
@@ -1547,10 +1351,24 @@ HTML_TEMPLATE = """
       }
     }
 
-    // Load initial theme
     const savedTheme = localStorage.getItem('cinemix_theme') || 'dark';
     document.body.setAttribute('data-theme', savedTheme);
     updateThemeUI(savedTheme);
+
+    // About Modal
+    function openAboutModal() {
+      document.getElementById('about-modal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAboutModal() {
+      document.getElementById('about-modal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    function closeAboutModalOnBackdrop(e) {
+      if (e.target.id === 'about-modal') closeAboutModal();
+    }
 
     // Letterboxd-Style Dynamic SVG Poster Fallback
     function createFallbackPoster(title, genre, year) {
@@ -1594,15 +1412,14 @@ HTML_TEMPLATE = """
       const words = plot.split(/\\s+/).filter(w => w.length > 0);
       if (words.length < 15) {
         const alertBox = document.getElementById('validation-alert');
-        document.getElementById('validation-msg').innerText = `Please enter at least 15 words for accurate NLP feature extraction (currently ${words.length} words).`;
+        document.getElementById('validation-msg').innerText = `Please enter at least 15 words for reliable NLP classification (currently ${words.length} words).`;
         alertBox.style.display = "flex";
+        expandTypebar();
         document.getElementById('plot').focus();
         return;
       }
       document.getElementById('validation-alert').style.display = "none";
 
-      // Show skeleton, hide empty state & result
-      document.getElementById('empty-state').style.display = "none";
       document.getElementById('result-section').style.display = "none";
       document.getElementById('skeleton-loader').style.display = "block";
 
@@ -1623,7 +1440,6 @@ HTML_TEMPLATE = """
         currentPrediction = predRes;
         allRecommendations = recRes.recommendations || [];
 
-        // Hide skeleton & show result
         document.getElementById('skeleton-loader').style.display = "none";
         document.getElementById('result-section').style.display = "block";
 
@@ -1647,7 +1463,6 @@ HTML_TEMPLATE = """
           `;
         });
 
-        // Animate progress bars
         setTimeout(() => {
           predRes.top_predictions.forEach((item, idx) => {
             const fill = document.getElementById(`prob-fill-${idx}`);
@@ -1787,7 +1602,10 @@ HTML_TEMPLATE = """
     }
 
     window.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        closeModal();
+        closeAboutModal();
+      }
     });
 
     // Copy Result Text
@@ -1835,170 +1653,6 @@ HTML_TEMPLATE = """
       document.getElementById('fb-status').style.display = "block";
     }
 
-    // Analytics Tab Charts with Letterboxd Palette
-    let chartsCreated = false;
-    async function loadAnalytics() {
-      if (chartsCreated) return;
-      try {
-        const data = await fetch('/api/metrics').then(r => r.json());
-        analyticsData = data;
-
-        // KPI
-        document.getElementById('kpi-hamming').innerText = (data.hamming_accuracy * 100).toFixed(1) + '%';
-        document.getElementById('kpi-microf1').innerText = (data.micro_f1 * 100).toFixed(1) + '%';
-        document.getElementById('kpi-hitrate').innerText = (data.top3_hit_rate * 100).toFixed(1) + '%';
-        document.getElementById('kpi-catalog').innerText = data.dataset_size.toLocaleString();
-
-        const isDark = document.body.getAttribute('data-theme') !== 'light';
-        const textColor = isDark ? '#ffffff' : '#14181c';
-        const mutedColor = isDark ? '#99aabb' : '#556677';
-        const gridColor = isDark ? '#2c3440' : '#cfd8e3';
-
-        // 1. Distribution Chart
-        const distLabels = Object.keys(data.genre_distribution);
-        const distVals = Object.values(data.genre_distribution);
-        new Chart(document.getElementById('chart-distribution'), {
-          type: 'doughnut',
-          data: {
-            labels: distLabels,
-            datasets: [{
-              data: distVals,
-              backgroundColor: [
-                '#00e054', '#40bcf4', '#ff8000', '#20c997', '#6f42c1',
-                '#33e080', '#55ccff', '#ff9933', '#10b981', '#0ea5e9',
-                '#8b5cf6', '#ec4899'
-              ],
-              borderWidth: 2,
-              borderColor: isDark ? '#1c2228' : '#ffffff'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'right', labels: { color: mutedColor, font: { size: 11, weight: '700' } } }
-            }
-          }
-        });
-
-        // 2. Metrics Chart (F1, Precision, Recall)
-        const genres = data.top_12_genres;
-        const rep = data.classification_report || {};
-        const f1s = genres.map(g => (rep[g] ? rep[g]['f1-score'] : 0));
-        const precs = genres.map(g => (rep[g] ? rep[g].precision : 0));
-        const recs = genres.map(g => (rep[g] ? rep[g].recall : 0));
-
-        new Chart(document.getElementById('chart-metrics'), {
-          type: 'bar',
-          data: {
-            labels: genres,
-            datasets: [
-              { label: 'F1-Score', data: f1s, backgroundColor: '#00e054' },
-              { label: 'Precision', data: precs, backgroundColor: '#40bcf4' },
-              { label: 'Recall', data: recs, backgroundColor: '#ff8000' }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { ticks: { color: mutedColor, font: { size: 10 } }, grid: { display: false } },
-              y: { max: 1.0, ticks: { color: mutedColor }, grid: { color: gridColor } }
-            },
-            plugins: {
-              legend: { labels: { color: textColor, font: { weight: '700' } } }
-            }
-          }
-        });
-
-        // 3. Benchmark Comparison
-        const bm = data.benchmark_comparison || {};
-        const bmModels = Object.keys(bm);
-        const bmMicro = bmModels.map(m => bm[m].mean_micro_f1);
-        const bmMacro = bmModels.map(m => bm[m].mean_macro_f1);
-
-        new Chart(document.getElementById('chart-benchmark'), {
-          type: 'bar',
-          data: {
-            labels: bmModels.map(m => m.replace(' (Balanced)', '')),
-            datasets: [
-              { label: 'Micro F1 (5-Fold CV)', data: bmMicro, backgroundColor: '#00e054' },
-              { label: 'Macro F1 (5-Fold CV)', data: bmMacro, backgroundColor: '#40bcf4' }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { ticks: { color: mutedColor, font: { weight: '700' } }, grid: { display: false } },
-              y: { max: 0.8, ticks: { color: mutedColor }, grid: { color: gridColor } }
-            },
-            plugins: {
-              legend: { labels: { color: textColor, font: { weight: '700' } } }
-            }
-          }
-        });
-
-        // 4. Co-occurrence Matrix Table
-        const coMat = data.co_occurrence_matrix || {};
-        let tableHtml = '<table style="width:100%; border-collapse:collapse; font-size:0.75rem; text-align:center;"><thead><tr><th></th>';
-        genres.forEach(g => { tableHtml += `<th style="padding:4px; color:var(--lb-green);">${g.slice(0,4)}</th>`; });
-        tableHtml += '</tr></thead><tbody>';
-
-        genres.forEach(g1 => {
-          tableHtml += `<tr><td style="padding:4px; font-weight:700; text-align:left; color:var(--text);">${g1}</td>`;
-          genres.forEach(g2 => {
-            const count = (coMat[g1] && coMat[g1][g2]) || 0;
-            const intensity = g1 === g2 ? 0.35 : Math.min(count / 300, 0.9);
-            const bg = `rgba(0, 224, 84, ${intensity})`;
-            tableHtml += `<td style="padding:4px; background:${bg}; border:1px solid var(--border); color:#ffffff;">${count}</td>`;
-          });
-          tableHtml += '</tr>';
-        });
-        tableHtml += '</tbody></table>';
-        document.getElementById('co-matrix-wrap').innerHTML = tableHtml;
-
-        // Predictive Words Pills
-        const pillsWrap = document.getElementById('genre-pills');
-        pillsWrap.innerHTML = '';
-        genres.forEach((g, idx) => {
-          pillsWrap.innerHTML += `
-            <button class="pill-btn ${idx === 0 ? 'active' : ''}" onclick="showPredictiveWords('${g}')">
-              ${g}
-            </button>
-          `;
-        });
-        showPredictiveWords(genres[0]);
-
-        chartsCreated = true;
-      } catch (err) {
-        console.error("Failed to load analytics", err);
-      }
-    }
-
-    function showPredictiveWords(genre) {
-      if (!analyticsData || !analyticsData.top_predictive_words) return;
-      document.querySelectorAll('.pill-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText.trim() === genre);
-      });
-      const words = analyticsData.top_predictive_words[genre] || [];
-      const wrap = document.getElementById('genre-words-display');
-      wrap.innerHTML = '';
-      words.forEach(w => {
-        wrap.innerHTML += `
-          <span class="word-chip">
-            <span>${w.word}</span>
-            <span class="word-weight">+${w.weight}</span>
-          </span>
-        `;
-      });
-    }
-
-    function toggleAccordion(el) {
-      const body = el.nextElementSibling;
-      body.classList.toggle('open');
-    }
-
     // Auto-load URL search params if present
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
@@ -2007,6 +1661,7 @@ HTML_TEMPLATE = """
       if (synopsis) {
         document.getElementById('plot').value = synopsis;
         if (kw) document.getElementById('keywords').value = kw;
+        expandTypebar();
         updateWordCount();
         runPrediction();
       }
@@ -2031,7 +1686,7 @@ def api_predict():
     identifies top 3 genres, detects low-confidence ambiguity, and outputs feature attribution.
     """
     data = request.get_json(silent=True) or {}
-    overview = data.get("overview", "")
+    overview = data.get("overview") or data.get("plot", "")
     keywords = data.get("keywords", "")
     top_k = int(data.get("top_k", 3))
 
@@ -2109,6 +1764,7 @@ def api_predict():
         "confidence": primary_conf,
         "confidence_percentage": f"{primary_conf * 100:.1f}%",
         "top_predictions": top_predictions,
+        "top_genres": top_predictions,
         "low_confidence_warning": low_confidence,
         "low_confidence_message": low_conf_msg,
         "influential_words": influential_words[:8]
@@ -2122,7 +1778,7 @@ def api_recommend():
     0.60 * Cosine Similarity + 0.25 * Genre Jaccard Overlap + 0.15 * Rating Normalization.
     """
     data = request.get_json(silent=True) or {}
-    overview = data.get("overview", "")
+    overview = data.get("overview") or data.get("plot", "")
     keywords = data.get("keywords", "")
     top_n = int(data.get("top_n", 12))
 

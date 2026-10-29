@@ -337,9 +337,9 @@ with st.sidebar:
         st.warning("Model artifacts not yet initialized.")
 
 
-# --- MAIN HEADER ---
+# --- MAIN HEADER (Minimal Cinemix ▶) ---
 st.markdown("""
-<div class="brand-title-wrap">
+<div class="brand-title-wrap" style="margin-bottom: 1.5rem;">
     <span class="main-header">CINEMIX</span>
     <span class="play-icon-badge">▶</span>
     <div class="lb-dots-wrap" title="Cinemix Film Intelligence">
@@ -349,7 +349,24 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Letterboxd-styled Multi-Label NLP Classification & Hybrid Content Recommender across 4,680+ titles.</div>', unsafe_allow_html=True)
+
+# About Cinemix Expander (Explaining Site and Working)
+with st.expander("ℹ️ About Cinemix & How It Works", expanded=False):
+    st.markdown("""
+    ### 🎬 About Cinemix ▶
+    **Cinemix ▶** is a minimalist Letterboxd-styled cinema discovery and multi-label genre classification platform.
+    Screenwriters, cinephiles, and movie fans can input any plot synopsis or narrative summary to predict its true **multi-label genre DNA**
+    and instantly discover the closest matching films and anime across a curated catalog of **4,680+ titles**.
+
+    ---
+    ### 💡 How It Works (Pipeline Architecture)
+    1. **Morphological Normalization & Lemmatization**: Storylines undergo lowercase conversion, punctuation filtering, stopword stripping, and Snowball morphological stemming paired with irregular domain dictionaries.
+    2. **Sublinear TF-IDF (6,000 N-Grams)**: Extracts unigram and bigram narrative tokens with logarithmic sublinear term frequency scaling ($tf = 1 + \ln(count)$) to weight distinctive thematic cues.
+    3. **Multi-Label One-vs-Rest Logistic Regression**: 12 balanced binary classifiers compute calibrated sigmoid probabilities $P(C|x) = \frac{1}{1 + e^{-(w_c^T x + b_c)}}$ to deliver the top 3 genres with confidence percentages.
+    4. **3-Tier Hybrid Recommendation Formula**: Content matches are ranked via:
+       $$\text{Hybrid Score} = 0.60 \times \text{Cosine Sim} + 0.25 \times \text{Genre Jaccard} + 0.15 \times \text{Normalized Rating}$$
+    5. **Empirical Benchmarks**: Evaluated via 5-Fold Cross Validation achieving **86.7% Hamming Accuracy**, **67.7% Micro F1**, and a **96.8% Top-3 Any Hit Rate**.
+    """)
 
 # Check model availability; offer training prompt if absent
 engine, load_error = load_app_engine()
@@ -369,144 +386,132 @@ if engine is None or not engine.is_ready():
     st.stop()
 
 
-# --- TABS INTERFACE ---
-tab1, tab2 = st.tabs([
-    "🎯 Predict & Recommend",
-    "📈 Dataset Analytics"
-])
-
-
 # ==========================================
-# TAB 1: GENRE PREDICTOR & RECOMMENDER
+# MINIMALIST PREDICTOR & RECOMMENDER
 # ==========================================
-with tab1:
-    st.markdown("### 📝 Input Movie or Anime Synopsis")
-    st.caption("Provide a storyline summary (minimum 15 words) and thematic keywords to predict multi-label genres and discover similar content.")
+selected_preset_key = st.selectbox(
+    "⚡ Quick Archetype Presets (Select to auto-fill form):",
+    options=list(SAMPLE_PRESETS.keys()),
+    index=0
+)
+preset_data = SAMPLE_PRESETS[selected_preset_key]
 
-    selected_preset_key = st.selectbox(
-        "⚡ Quick Archetype Presets (Select to auto-fill form):",
-        options=list(SAMPLE_PRESETS.keys()),
-        index=0
-    )
-    preset_data = SAMPLE_PRESETS[selected_preset_key]
-
-    with st.form("prediction_form", clear_on_submit=False):
-        col_input1, col_input2 = st.columns([3, 2])
+with st.form("prediction_form", clear_on_submit=False):
+    col_input1, col_input2 = st.columns([3, 2])
+    
+    with col_input1:
+        input_overview = st.text_area(
+            "Plot Overview / Synopsis (15 words minimum):",
+            value=preset_data["overview"],
+            placeholder="e.g. A young ninja with a sealed spirit beast inside him trains relentlessly to earn the respect of his village and become the ultimate leader...",
+            height=150,
+            help="The narrative summary of the title. Preprocessed via Snowball lemmatization and TF-IDF."
+        )
+    
+    with col_input2:
+        input_keywords = st.text_area(
+            "Thematic Keywords / Tags (Optional):",
+            value=preset_data["keywords"],
+            placeholder="e.g. space travel, ninja, superhero, exorcism, friendship, artificial intelligence",
+            height=150,
+            help="Key thematic tags or motifs providing contextual weight."
+        )
         
-        with col_input1:
-            input_overview = st.text_area(
-                "Plot Overview / Synopsis (15 words minimum):",
-                value=preset_data["overview"],
-                placeholder="e.g. A young ninja with a sealed spirit beast inside him trains relentlessly to earn the respect of his village and become the ultimate leader...",
-                height=150,
-                help="The narrative summary of the title. Preprocessed via Snowball lemmatization and TF-IDF."
-            )
-        
-        with col_input2:
-            input_keywords = st.text_area(
-                "Thematic Keywords / Tags (Optional):",
-                value=preset_data["keywords"],
-                placeholder="e.g. space travel, ninja, superhero, exorcism, friendship, artificial intelligence",
-                height=150,
-                help="Key thematic tags or motifs providing contextual weight."
-            )
-            
-            top_rec_count = st.slider("Number of Recommendations:", min_value=3, max_value=8, value=4)
+        top_rec_count = st.slider("Number of Recommendations:", min_value=3, max_value=8, value=4)
 
-        submit_btn = st.form_submit_button("⚡ Classify Genres & Match Films", use_container_width=True, type="primary")
+    submit_btn = st.form_submit_button("⚡ Classify Genres & Match Films", use_container_width=True, type="primary")
 
-    if submit_btn or (input_overview.strip() and selected_preset_key != "Select an archetype preset..."):
-        words = input_overview.strip().split()
-        if len(words) < 15:
-            st.error(f"Please enter at least 15 words for reliable NLP feature classification (currently {len(words)} words).")
-        else:
-            with st.spinner("Analyzing narrative features with Multi-Label OneVsRest Pipeline..."):
-                pred_result = engine.predict_genres(input_overview, input_keywords, top_k=3)
-                recs = engine.recommend_movies(input_overview, input_keywords, top_n=top_rec_count)
+if submit_btn or (input_overview.strip() and selected_preset_key != "Select an archetype preset..."):
+    words = input_overview.strip().split()
+    if len(words) < 15:
+        st.error(f"Please enter at least 15 words for reliable NLP feature classification (currently {len(words)} words).")
+    else:
+        with st.spinner("Analyzing narrative features with Multi-Label OneVsRest Pipeline..."):
+            pred_result = engine.predict_genres(input_overview, input_keywords, top_k=3)
+            recs = engine.recommend_movies(input_overview, input_keywords, top_n=top_rec_count)
 
-            # --- PREDICTION BANNER ---
-            primary_genre = pred_result["primary_genre"]
-            primary_pct = pred_result["primary_percentage"]
+        # --- PREDICTION BANNER ---
+        primary_genre = pred_result["primary_genre"]
+        primary_pct = pred_result["primary_percentage"]
 
-            st.markdown(f"""
-            <div class="prediction-box">
-                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #99aabb; font-weight: 800;">
-                    Primary Genre Classification
-                </div>
-                <div style="margin-top: 0.4rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                    <span class="genre-badge">{primary_genre}</span>
-                    <span style="font-size: 1.15rem; color: #ffffff;">
-                        Calibrated Probability: <strong style="color:#00e054;">{primary_pct}</strong>
-                    </span>
-                </div>
+        st.markdown(f"""
+        <div class="prediction-box">
+            <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #99aabb; font-weight: 800;">
+                Primary Genre Classification
             </div>
-            """, unsafe_allow_html=True)
+            <div style="margin-top: 0.4rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span class="genre-badge">{primary_genre}</span>
+                <span style="font-size: 1.15rem; color: #ffffff;">
+                    Calibrated Probability: <strong style="color:#00e054;">{primary_pct}</strong>
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-            # Low Confidence Warning Alert
-            if pred_result.get("low_confidence_warning"):
-                st.warning(f"⚠️ {pred_result.get('low_confidence_message')}")
+        # Low Confidence Warning Alert
+        if pred_result.get("low_confidence_warning"):
+            st.warning(f"⚠️ {pred_result.get('low_confidence_message')}")
 
-            # Top 3 Genres Columns
-            col_t1, col_t2, col_t3 = st.columns(3)
-            top_preds = pred_result.get("top_predictions", [])
-            cols = [col_t1, col_t2, col_t3]
-            ranks = ["#1 Primary Genre", "#2 Secondary Genre", "#3 Tertiary Genre"]
+        # Top 3 Genres Columns
+        col_t1, col_t2, col_t3 = st.columns(3)
+        top_preds = pred_result.get("top_predictions", [])
+        cols = [col_t1, col_t2, col_t3]
+        ranks = ["#1 Primary Genre", "#2 Secondary Genre", "#3 Tertiary Genre"]
 
-            for i, p in enumerate(top_preds[:3]):
-                with cols[i]:
-                    st.metric(
-                        label=ranks[i],
-                        value=p["genre"],
-                        delta=p["percentage"]
-                    )
-                    st.progress(float(p["probability"]))
+        for i, p in enumerate(top_preds[:3]):
+            with cols[i]:
+                st.metric(
+                    label=ranks[i],
+                    value=p["genre"],
+                    delta=p["percentage"]
+                )
+                st.progress(float(p["probability"]))
 
-            # Explainability: Why this prediction?
-            inf_words = pred_result.get("influential_words", [])
-            if inf_words:
-                st.markdown("#### 🔍 Why this prediction? (Top Influential Narrative Signals)")
-                chips_html = "".join([f'<span class="word-chip">{w["word"]} <span style="color:#00e054;">+{w["impact"]}</span></span>' for w in inf_words])
-                st.markdown(chips_html, unsafe_allow_html=True)
+        # Explainability: Why this prediction?
+        inf_words = pred_result.get("influential_words", [])
+        if inf_words:
+            st.markdown("#### 🔍 Why this prediction? (Top Influential Narrative Signals)")
+            chips_html = "".join([f'<span class="word-chip">{w["word"]} <span style="color:#00e054;">+{w["impact"]}</span></span>' for w in inf_words])
+            st.markdown(chips_html, unsafe_allow_html=True)
 
-            # --- RECOMMENDATION CARDS ---
-            st.markdown("---")
-            st.markdown(f"### 🎯 Content-Based Recommendations (Top {len(recs)} Matches)")
-            st.caption("Hybrid Scoring = 60% TF-IDF Cosine Similarity + 25% Genre Jaccard Overlap + 15% Rating Normalization.")
+        # --- RECOMMENDATION CARDS ---
+        st.markdown("---")
+        st.markdown(f"### 🎯 Content-Based Recommendations (Top {len(recs)} Matches)")
+        st.caption("Hybrid Scoring = 60% TF-IDF Cosine Similarity + 25% Genre Jaccard Overlap + 15% Rating Normalization.")
 
-            if not recs:
-                st.info("No close recommendations found matching your criteria.")
-            else:
-                for idx, movie in enumerate(recs, 1):
-                    sim_pct = movie["similarity_percentage"]
-                    genres_str = " • ".join(movie.get("genres", []))
-                    rating = movie.get("vote_average", 0.0)
-                    year = movie.get("release_year", "N/A")
-                    
-                    st.markdown(f"""
-                    <div class="rec-card">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
-                            <div class="rec-title">#{idx}. {movie['title']} ({year})</div>
-                            <div>
-                                <span class="genre-pill">★ {rating:.1f}/10</span>
-                                <span class="genre-pill">{genres_str}</span>
-                                <span class="sim-badge">Match: {sim_pct}</span>
-                            </div>
-                        </div>
-                        <div class="rec-overview">
-                            {movie['overview']}
-                        </div>
-                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #99aabb;">
-                            <strong>Themes:</strong> {movie.get('keywords', 'N/A')}
+        if not recs:
+            st.info("No close recommendations found matching your criteria.")
+        else:
+            for idx, movie in enumerate(recs, 1):
+                sim_pct = movie["similarity_percentage"]
+                genres_str = " • ".join(movie.get("genres", []))
+                rating = movie.get("vote_average", 0.0)
+                year = movie.get("release_year", "N/A")
+                
+                st.markdown(f"""
+                <div class="rec-card">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
+                        <div class="rec-title">#{idx}. {movie['title']} ({year})</div>
+                        <div>
+                            <span class="genre-pill">★ {rating:.1f}/10</span>
+                            <span class="genre-pill">{genres_str}</span>
+                            <span class="sim-badge">Match: {sim_pct}</span>
                         </div>
                     </div>
-                    """, unsafe_allow_html=True)
+                    <div class="rec-overview">
+                        {movie['overview']}
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #99aabb;">
+                        <strong>Themes:</strong> {movie.get('keywords', 'N/A')}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
 
 
 # ==========================================
-# TAB 2: DATASET & MODEL ANALYTICS
+# OPTIONAL EXPANDER: DATASET & MODEL ANALYTICS
 # ==========================================
-with tab2:
-    st.markdown("### 📊 Multi-Label Performance & Diagnostics")
+with st.expander("📊 Dataset & Model Analytics (Benchmark Diagnostics)", expanded=False):
     st.caption("Empirical metrics computed across 4,680 titles using 5-Fold Cross Validation.")
 
     metrics = load_metrics()
