@@ -11,7 +11,7 @@ import re
 import urllib.request
 import urllib.parse
 from pathlib import Path
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, redirect, Response
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODELS_DIR = BASE_DIR / "models"
@@ -26,9 +26,18 @@ def get_bundle():
     """Load pre-trained serverless model bundle."""
     global _BUNDLE
     if _BUNDLE is None:
-        bundle_path = MODELS_DIR / "serverless_model.json"
-        if not bundle_path.exists():
-            raise FileNotFoundError(f"Model bundle not found at {bundle_path}")
+        candidate_paths = [
+            Path(__file__).resolve().parent / "serverless_model.json",
+            MODELS_DIR / "serverless_model.json",
+            BASE_DIR / "models" / "serverless_model.json"
+        ]
+        bundle_path = None
+        for p in candidate_paths:
+            if p.exists():
+                bundle_path = p
+                break
+        if bundle_path is None:
+            raise FileNotFoundError(f"Model bundle not found. Checked: {[str(p) for p in candidate_paths]}")
         with open(bundle_path, "r", encoding="utf-8") as f:
             _BUNDLE = json.load(f)
     return _BUNDLE
@@ -347,36 +356,42 @@ HTML_TEMPLATE = """
       font-weight: 500;
     }
 
-    /* EXPANDABLE HOVER TYPEBAR */
+    /* BUTTERY SMOOTH EXPANDABLE TYPEBAR */
     .expandable-search-wrapper {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 0.9rem 1.25rem;
+      padding: 0.85rem 1.25rem;
       max-width: 860px;
       margin: 0 auto 2.5rem auto;
       box-shadow: 0 4px 20px var(--shadow-color);
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
       position: relative;
     }
     .expandable-search-wrapper:hover,
     .expandable-search-wrapper:focus-within,
     .expandable-search-wrapper.is-expanded {
       border-color: var(--lb-green);
-      box-shadow: 0 0 28px var(--lb-green-glow), 0 8px 32px rgba(0,0,0,0.45);
-      transform: translateY(-2px);
+      box-shadow: 0 0 24px var(--lb-green-glow), 0 8px 32px rgba(0,0,0,0.45);
     }
 
     .search-top-bar {
       display: flex;
       align-items: flex-start;
       gap: 0.85rem;
+      position: relative;
     }
     .search-lens-icon {
       font-size: 1.35rem;
       color: var(--lb-green);
-      margin-top: 0.2rem;
+      margin-top: 0.22rem;
       flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .expandable-search-wrapper:hover .search-lens-icon,
+    .expandable-search-wrapper:focus-within .search-lens-icon,
+    .expandable-search-wrapper.is-expanded .search-lens-icon {
+      transform: scale(1.08);
     }
     .expandable-textarea {
       flex: 1;
@@ -388,9 +403,9 @@ HTML_TEMPLATE = """
       font-size: 1.05rem;
       line-height: 1.5;
       resize: none;
-      min-height: 40px;
+      height: 44px;
       padding: 0.2rem 0;
-      transition: min-height 0.3s ease;
+      transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .expandable-textarea:focus {
       outline: none !important;
@@ -399,7 +414,7 @@ HTML_TEMPLATE = """
     .expandable-search-wrapper:hover .expandable-textarea,
     .expandable-search-wrapper:focus-within .expandable-textarea,
     .expandable-search-wrapper.is-expanded .expandable-textarea {
-      min-height: 110px;
+      height: 96px;
     }
 
     .quick-submit-btn {
@@ -425,22 +440,35 @@ HTML_TEMPLATE = """
       transform: scale(1.05);
     }
 
-    /* Expanded Tray */
+    /* Silky Smooth CSS Grid Expansion for the Tray */
     .search-expanded-tray {
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin-top 0.3s ease;
-      margin-top: 0;
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .expandable-search-wrapper:hover .search-expanded-tray,
     .expandable-search-wrapper:focus-within .search-expanded-tray,
     .expandable-search-wrapper.is-expanded .search-expanded-tray {
-      max-height: 380px;
+      grid-template-rows: 1fr;
+    }
+
+    .tray-inner {
+      overflow: hidden;
+      min-height: 0;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.24s ease, transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      border-top: 1px solid transparent;
+      padding-top: 0;
+    }
+    .expandable-search-wrapper:hover .tray-inner,
+    .expandable-search-wrapper:focus-within .tray-inner,
+    .expandable-search-wrapper.is-expanded .tray-inner {
       opacity: 1;
-      margin-top: 0.85rem;
-      border-top: 1px solid var(--border-subtle);
+      transform: translateY(0);
+      border-top-color: var(--border-subtle);
       padding-top: 0.85rem;
+      margin-top: 0.5rem;
     }
 
     .counter-row {
@@ -979,53 +1007,63 @@ HTML_TEMPLATE = """
         </button>
       </div>
 
-      <!-- Expanded Tray (Revealed on hover or focus) -->
+      <!-- Expanded Tray (Revealed smoothly on hover or focus) -->
       <div class="search-expanded-tray">
-        <div class="counter-row">
-          <span id="word-badge" class="counter-badge counter-invalid">0 / 15 words minimum</span>
-          <span id="char-badge">0 characters</span>
-        </div>
-
-        <div class="search-secondary-row">
-          <div>
-            <input type="text" id="keywords" placeholder="Thematic keywords / tags (e.g. space travel, cyberpunk, noir, demons)...">
+        <div class="tray-inner">
+          <div class="counter-row">
+            <span id="word-badge" class="counter-badge counter-invalid">0 / 15 words minimum</span>
+            <span id="char-badge">0 characters</span>
           </div>
-          <div>
-            <select id="presets" onchange="applyPreset()">
-              <option value="">⚡ Quick Archetype Presets...</option>
-              <option value="scifi">Interstellar (Sci-Fi • Wormhole & Tesseract)</option>
-              <option value="action">The Dark Knight (Action • Gotham Vigilante)</option>
-              <option value="shonen">Demon Slayer (Anime • Demon Slaying Blade)</option>
-              <option value="horror">The Conjuring (Horror • Farmhouse Possession)</option>
-              <option value="comedy">Superbad (Comedy • High School Wild Party)</option>
-              <option value="cyberpunk">Ghost in the Shell (Anime • Cyborg Hacker)</option>
-              <option value="romance">La La Land (Romance • Jazz & Dreams)</option>
-              <option value="animation">Spirited Away (Anime • Spirit Bathhouse)</option>
-            </select>
+
+          <div class="search-secondary-row">
+            <div>
+              <input type="text" id="keywords" placeholder="Thematic keywords / tags (e.g. space travel, cyberpunk, noir, demons)...">
+            </div>
+            <div>
+              <select id="presets" onchange="applyPreset(true)">
+                <option value="">⚡ Quick Archetype Presets...</option>
+                <option value="scifi">Interstellar (Sci-Fi • Wormhole & Tesseract)</option>
+                <option value="action">The Dark Knight (Action • Gotham Vigilante)</option>
+                <option value="shonen">Demon Slayer (Anime • Demon Slaying Blade)</option>
+                <option value="horror">The Conjuring (Horror • Farmhouse Possession)</option>
+                <option value="comedy">Superbad (Comedy • High School Wild Party)</option>
+                <option value="cyberpunk">Ghost in the Shell (Anime • Cyborg Hacker)</option>
+                <option value="romance">La La Land (Romance • Jazz & Dreams)</option>
+                <option value="animation">Spirited Away (Anime • Spirit Bathhouse)</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Word Count Alert -->
-        <div id="validation-alert" class="validation-alert">
-          <span>⚠️</span> <span id="validation-msg">Please enter at least 15 words for reliable NLP feature classification (currently 0 words).</span>
-        </div>
+          <!-- Word Count Alert -->
+          <div id="validation-alert" class="validation-alert">
+            <span>⚠️</span> <span id="validation-msg">Please enter at least 15 words for reliable NLP feature classification (currently 0 words).</span>
+          </div>
 
-        <!-- Action Toolbar -->
-        <div class="button-toolbar">
-          <button class="cr-btn" onclick="runPrediction()">
-            <span>⚡</span> Classify Genres & Match Films
-          </button>
-          <button class="cr-btn-secondary" onclick="tryRandomExample()">
-            <span>🎲</span> Random Example
-          </button>
-          <button class="cr-btn-secondary" onclick="clearInputs()">
-            <span>🗑️</span> Clear
-          </button>
-          <button class="cr-btn-secondary" onclick="copyShareableLink()">
-            <span>🔗</span> Share Link
-          </button>
+          <!-- Action Toolbar -->
+          <div class="button-toolbar">
+            <button class="cr-btn" onclick="runPrediction()">
+              <span>⚡</span> Classify Genres & Match Films
+            </button>
+            <button class="cr-btn-secondary" onclick="tryRandomExample()">
+              <span>🎲</span> Random Example
+            </button>
+            <button class="cr-btn-secondary" onclick="clearInputs()">
+              <span>🗑️</span> Clear
+            </button>
+            <button class="cr-btn-secondary" onclick="copyShareableLink()">
+              <span>🔗</span> Share Link
+            </button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Inline Error Alert -->
+    <div id="error-alert" class="validation-alert" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; margin: 1.5rem auto; max-width: 860px; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span>⚠️</span> <span id="error-alert-msg">Inference error. Please check synopsis and try again.</span>
+      </div>
+      <button class="cr-btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;" onclick="runPrediction()">🔄 Retry</button>
     </div>
 
     <!-- Skeleton Shimmer Loader -->
@@ -1120,8 +1158,8 @@ HTML_TEMPLATE = """
           </select>
         </div>
         <div>
-          <label for="filter-rating">Min Rating: <span id="rating-val" style="color: var(--lb-green); font-weight: 900;">6.0</span> ★</label>
-          <input type="range" id="filter-rating" min="0" max="9" step="0.5" value="6.0" oninput="document.getElementById('rating-val').innerText = this.value; applyFilters();">
+          <label for="filter-rating">Min Rating: <span id="rating-val" style="color: var(--lb-green); font-weight: 900;">0.0</span> ★</label>
+          <input type="range" id="filter-rating" min="0" max="9" step="0.5" value="0.0" oninput="document.getElementById('rating-val').innerText = this.value; applyFilters();">
         </div>
       </div>
 
@@ -1274,16 +1312,28 @@ HTML_TEMPLATE = """
 
     let allRecommendations = [];
     let currentPrediction = null;
+    let collapseTimer = null;
 
-    // Typebar expansion
+    // Typebar expansion with debounce & stability
     function expandTypebar() {
+      clearTimeout(collapseTimer);
       document.getElementById('search-box').classList.add('is-expanded');
+    }
+
+    function collapseTypebar(force = false) {
+      const text = document.getElementById('plot').value.trim();
+      const isFocused = document.activeElement === document.getElementById('plot') ||
+                        document.activeElement === document.getElementById('keywords') ||
+                        document.activeElement === document.getElementById('presets');
+      if (force || (!text && !isFocused)) {
+        document.getElementById('search-box').classList.remove('is-expanded');
+      }
     }
 
     // Word Counter
     function updateWordCount() {
       const text = document.getElementById('plot').value.trim();
-      const words = text ? text.split(/\\s+/).filter(w => w.length > 0) : [];
+      const words = text ? text.split(/\s+/).filter(w => w.length > 0) : [];
       const wordCount = words.length;
       const charCount = text.length;
 
@@ -1302,13 +1352,16 @@ HTML_TEMPLATE = """
       }
     }
 
-    function applyPreset() {
+    function applyPreset(autoRun = false) {
       const val = document.getElementById('presets').value;
       if (presets[val]) {
         document.getElementById('plot').value = presets[val].plot;
         document.getElementById('keywords').value = presets[val].keywords;
         expandTypebar();
         updateWordCount();
+        if (autoRun) {
+          runPrediction();
+        }
       }
     }
 
@@ -1316,8 +1369,7 @@ HTML_TEMPLATE = """
       const keys = Object.keys(presets);
       const randKey = keys[Math.floor(Math.random() * keys.length)];
       document.getElementById('presets').value = randKey;
-      applyPreset();
-      runPrediction();
+      applyPreset(true);
     }
 
     function clearInputs() {
@@ -1326,7 +1378,7 @@ HTML_TEMPLATE = """
       document.getElementById('presets').value = "";
       updateWordCount();
       document.getElementById('result-section').style.display = "none";
-      document.getElementById('search-box').classList.remove('is-expanded');
+      collapseTypebar(true);
     }
 
     // Theme Toggle
@@ -1409,36 +1461,45 @@ HTML_TEMPLATE = """
       const plot = document.getElementById('plot').value.trim();
       const keywords = document.getElementById('keywords').value.trim();
 
-      const words = plot.split(/\\s+/).filter(w => w.length > 0);
+      const words = plot.split(/\s+/).filter(w => w.length > 0);
       if (words.length < 15) {
         const alertBox = document.getElementById('validation-alert');
-        document.getElementById('validation-msg').innerText = `Please enter at least 15 words for reliable NLP classification (currently ${words.length} words).`;
+        document.getElementById('validation-msg').innerText = `Please enter at least 15 words for reliable NLP classification (currently ${words.length} words). Try selecting a preset above or click 🎲 Random Example!`;
         alertBox.style.display = "flex";
         expandTypebar();
         document.getElementById('plot').focus();
         return;
       }
       document.getElementById('validation-alert').style.display = "none";
+      const errAlert = document.getElementById('error-alert');
+      if (errAlert) errAlert.style.display = "none";
 
       document.getElementById('result-section').style.display = "none";
       document.getElementById('skeleton-loader').style.display = "block";
 
       try {
-        const [predRes, recRes] = await Promise.all([
+        const [pResp, rResp] = await Promise.all([
           fetch('/api/predict', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ overview: plot, keywords: keywords, top_k: 3 })
-          }).then(r => r.json()),
+          }),
           fetch('/api/recommend', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ overview: plot, keywords: keywords, top_n: 12 })
-          }).then(r => r.json())
+          })
         ]);
+
+        if (!pResp.ok) throw new Error(`Predict endpoint returned status ${pResp.status}`);
+        if (!rResp.ok) throw new Error(`Recommend endpoint returned status ${rResp.status}`);
+
+        const predRes = await pResp.json();
+        const recRes = await rResp.json();
 
         currentPrediction = predRes;
         allRecommendations = recRes.recommendations || [];
+        const topPreds = predRes.top_predictions || predRes.top_genres || [];
 
         document.getElementById('skeleton-loader').style.display = "none";
         document.getElementById('result-section').style.display = "block";
@@ -1448,7 +1509,7 @@ HTML_TEMPLATE = """
         top3Wrap.innerHTML = '';
         const ranks = ['#1 Primary Genre', '#2 Secondary Genre', '#3 Tertiary Genre'];
 
-        predRes.top_predictions.forEach((item, idx) => {
+        topPreds.forEach((item, idx) => {
           top3Wrap.innerHTML += `
             <div class="genre-card">
               <div class="genre-rank-tag">${ranks[idx] || '#' + (idx + 1)}</div>
@@ -1464,7 +1525,7 @@ HTML_TEMPLATE = """
         });
 
         setTimeout(() => {
-          predRes.top_predictions.forEach((item, idx) => {
+          topPreds.forEach((item, idx) => {
             const fill = document.getElementById(`prob-fill-${idx}`);
             if (fill) fill.style.width = (item.probability * 100) + '%';
           });
@@ -1503,7 +1564,12 @@ HTML_TEMPLATE = """
 
       } catch (err) {
         document.getElementById('skeleton-loader').style.display = "none";
-        alert("Error during inference: " + err);
+        const errBox = document.getElementById('error-alert');
+        if (errBox) {
+          document.getElementById('error-alert-msg').innerText = "Inference issue: " + err.message + ". Click Retry to re-run.";
+          errBox.style.display = "flex";
+          errBox.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
 
@@ -1537,14 +1603,16 @@ HTML_TEMPLATE = """
       }
 
       filtered.slice(0, 9).forEach((item, idx) => {
-        const fallback = createFallbackPoster(item.title, (item.genres[0] || ''), item.release_year);
+        const topGenre = (item.genres && item.genres[0]) || '';
+        const fallback = createFallbackPoster(item.title, topGenre, item.release_year);
         const chipsHtml = (item.genres || []).slice(0, 3).map(g => `<span class="genre-chip">${g}</span>`).join('');
 
         list.innerHTML += `
-          <article class="stream-card" onclick="openDetailsModal(${item.id})">
+          <article class="stream-card" onclick="openDetailsModal('${item.id}')">
             <img class="card-poster" 
-                 src="/api/tmdb-poster?title=${encodeURIComponent(item.title)}&year=${item.release_year}"
+                 src="/api/tmdb-poster?title=${encodeURIComponent(item.title)}&year=${item.release_year}&genre=${encodeURIComponent(topGenre)}"
                  alt="${escapeXml(item.title)} Poster"
+                 loading="lazy"
                  onerror="this.onerror=null; this.src='${fallback}';">
             <div class="card-content">
               <div class="card-top-row">
@@ -1566,12 +1634,13 @@ HTML_TEMPLATE = """
 
     // Details Modal
     function openDetailsModal(movieId) {
-      const item = allRecommendations.find(m => m.id === movieId);
+      const item = allRecommendations.find(m => String(m.id) === String(movieId));
       if (!item) return;
 
-      const fallback = createFallbackPoster(item.title, (item.genres[0] || ''), item.release_year);
+      const topGenre = (item.genres && item.genres[0]) || '';
+      const fallback = createFallbackPoster(item.title, topGenre, item.release_year);
       const posterImg = document.getElementById('modal-poster');
-      posterImg.src = `/api/tmdb-poster?title=${encodeURIComponent(item.title)}&year=${item.release_year}`;
+      posterImg.src = `/api/tmdb-poster?title=${encodeURIComponent(item.title)}&year=${item.release_year}&genre=${encodeURIComponent(topGenre)}`;
       posterImg.onerror = function() { this.src = fallback; };
 
       document.getElementById('modal-title').innerText = item.title;
@@ -1653,13 +1722,39 @@ HTML_TEMPLATE = """
       document.getElementById('fb-status').style.display = "block";
     }
 
-    // Auto-load URL search params if present
+    // Interaction Listeners for Smooth Typebar & Keyboard Support
     window.addEventListener('DOMContentLoaded', () => {
+      const searchBox = document.getElementById('search-box');
+      const plotInput = document.getElementById('plot');
+
+      // Mouseenter / Mouseleave with 260ms grace debounce
+      if (searchBox) {
+        searchBox.addEventListener('mouseenter', () => {
+          expandTypebar();
+        });
+        searchBox.addEventListener('mouseleave', () => {
+          collapseTimer = setTimeout(() => {
+            collapseTypebar(false);
+          }, 260);
+        });
+      }
+
+      // Enter key submits synopsis, Shift+Enter makes new line
+      if (plotInput) {
+        plotInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            runPrediction();
+          }
+        });
+      }
+
+      // Auto-load URL search params if present
       const params = new URLSearchParams(window.location.search);
       const synopsis = params.get('synopsis');
       const kw = params.get('keywords');
       if (synopsis) {
-        document.getElementById('plot').value = synopsis;
+        plotInput.value = synopsis;
         if (kw) document.getElementById('keywords').value = kw;
         expandTypebar();
         updateWordCount();
@@ -1853,31 +1948,48 @@ def api_feedback():
 
 @app.route("/api/tmdb-poster", methods=["GET"])
 def api_tmdb_poster():
-    """Fetch movie poster URL from TMDB API if TMDB_API_KEY is configured."""
+    """Fetch movie poster or redirect to TMDB poster URL if configured, with SVG fallback."""
     title = request.args.get("title", "").strip()
     year = request.args.get("year", "").strip()
+    genre = request.args.get("genre", "").strip()
     tmdb_key = os.environ.get("TMDB_API_KEY", "").strip()
 
-    if not tmdb_key or not title:
-        return jsonify({"poster_url": None, "source": "fallback"}), 404
+    if tmdb_key and title:
+        try:
+            params = {"api_key": tmdb_key, "query": title}
+            if year:
+                params["year"] = year
+            url = f"https://api.themoviedb.org/3/search/movie?{urllib.parse.urlencode(params)}"
+            req = urllib.request.Request(url, headers={"User-Agent": "Cinemix/2.0"})
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                results = data.get("results", [])
+                if results and results[0].get("poster_path"):
+                    poster_path = results[0]["poster_path"]
+                    return redirect(f"https://image.tmdb.org/t/p/w500{poster_path}", code=302)
+        except Exception:
+            pass
 
-    try:
-        params = {"api_key": tmdb_key, "query": title}
-        if year:
-            params["year"] = year
-        url = f"https://api.themoviedb.org/3/search/movie?{urllib.parse.urlencode(params)}"
-        req = urllib.request.Request(url, headers={"User-Agent": "Cinemix/2.0"})
-        with urllib.request.urlopen(req, timeout=3) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            results = data.get("results", [])
-            if results and results[0].get("poster_path"):
-                poster_path = results[0]["poster_path"]
-                full_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-                return jsonify({"poster_url": full_url, "source": "tmdb"})
-    except Exception:
-        pass
-
-    return jsonify({"poster_url": None, "source": "fallback"}), 404
+    # Clean Letterboxd-Style SVG Poster response (200 OK)
+    initials = "".join([w[0] for w in title.split() if w][:2]).upper() or "CX"
+    clean_title = (title[:24] + "...") if len(title) > 24 else title
+    clean_genre = genre or "Cinema"
+    clean_year = year or ""
+    svg_code = f"""<svg xmlns="http://www.w3.org/2000/svg" width="300" height="420" viewBox="0 0 300 420">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c2228"/>
+      <stop offset="100%" stop-color="#111418"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="420" fill="url(#bg)"/>
+  <circle cx="150" cy="170" r="54" fill="rgba(0, 224, 84, 0.12)" stroke="#00e054" stroke-width="2"/>
+  <text x="150" y="181" fill="#00e054" font-size="28" font-weight="900" font-family="'Plus Jakarta Sans', sans-serif" text-anchor="middle">{initials}</text>
+  <rect x="35" y="270" width="230" height="1" fill="#2c3440"/>
+  <text x="150" y="315" fill="#FFFFFF" font-size="15" font-weight="800" font-family="'Plus Jakarta Sans', sans-serif" text-anchor="middle">{clean_title}</text>
+  <text x="150" y="340" fill="#99aabb" font-size="12" font-weight="700" font-family="'Plus Jakarta Sans', sans-serif" text-anchor="middle">{clean_genre} {f'• {clean_year}' if clean_year else ''}</text>
+</svg>"""
+    return Response(svg_code, mimetype="image/svg+xml")
 
 
 if __name__ == "__main__":
